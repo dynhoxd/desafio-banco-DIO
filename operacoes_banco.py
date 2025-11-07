@@ -76,7 +76,7 @@ def menu():
         [d] Depositar
         [s] Sacar
         [e] Extrato
-        [cu] Criar Usuário
+        [ru] Registrar Usuário
         [cc] Criar Conta
         [lc] Listar Contas
         [x] Sair
@@ -116,14 +116,24 @@ def sacar(*, saldo, valor, extrato, limite, numero_saques, limite_saques):
     
     return saldo, extrato, numero_saques, limite, limite_saques, sucesso
         
-def exibir_extrato(saldo, /, extrato): 
+def exibir_extrato(saldo, /, *, extrato): 
     print("\n================ EXTRATO ================")
     if not extrato:
         print("Não foram realizadas movimentações.")
     else:
         print(extrato)
     print(f"\nSaldo: R$ {saldo:.2f}")
-    print("==========================================")
+    print("=========================================")
+
+def registrar_usuario(nome, data_nascimento, cpf, endereco, usuarios):
+    usuario = {"cpf":cpf, 
+                "nome": nome,
+                "data_nascimento": data_nascimento,
+                "endereco": endereco
+    }
+    usuarios.append(usuario)
+    print("Usuário registrado com sucesso.")
+    return usuarios
 
 def main():
     saldo = 0
@@ -131,8 +141,8 @@ def main():
     extrato = ""
     numero_saques = 0
     LIMITE_SAQUES = 3
-    usuários = {}
-    contas = {}
+    usuarios = []
+    contas = []
 
     while True:
         opcao = menu()
@@ -141,7 +151,10 @@ def main():
             saldo, extrato = depositar(saldo, valor, extrato)
         elif opcao == "s":
             while True:
-                valor = float(input("Informe o valor do saque: "))
+                vi = input("Informe o valor do saque ou digite x para voltar: ")
+                if vi.lower() == "x":
+                    break
+                valor = float(vi)
                 saldo, extrato, numero_saques, limite, LIMITE_SAQUES, sucesso = sacar(
                     saldo=saldo,
                     valor=valor,
@@ -153,7 +166,20 @@ def main():
                 if sucesso:
                     break
         elif opcao == "e":
-            exibir_extrato(saldo, extrato)
+            exibir_extrato(saldo, extrato=extrato)
+        elif opcao == "ru":
+            cpf = int(input("Informe o CPF do novo cliente (somente números): "))
+            cpf_existe = any(usuario.get("cpf") == cpf for usuario in usuarios)
+            if cpf_existe:
+                print("Já existe um usuário com esse CPF.")
+            else:
+                nome = input("Informe o nome do novo cliente: ")
+                data_nascimento = input("Informe a data de nascimento do novo cliente (DD-MM-AAAA): ")
+                endereco = input("Informe o endereço do novo cliente (logradouro, número - bairro - cidade/sigla estado): ")
+                usuarios = registrar_usuario(nome, data_nascimento, cpf, endereco, usuarios)
+        elif opcao == "m":
+            for usuario in usuarios:
+                print(usuario)
         elif opcao == "x":
             print("Obrigado por utilizar nossos serviços.")
             break    
@@ -165,7 +191,6 @@ main()
 
 
 
-# def criar_usuario(usuarios):
 # def criar_conta(agencia, numero_conta, usuarios):
 # def listar_contas(contas):
 
