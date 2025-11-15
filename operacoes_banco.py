@@ -1,3 +1,7 @@
+import datetime
+now = datetime.datetime.now()
+
+
 def menu():
     return input("""\n========= MENU DE OPERAÇÕES =========\n
         escolha uma opção: \n
@@ -12,10 +16,11 @@ def menu():
               \n=====================================\n
             => """)
 
-def depositar(saldo, valor, extrato, /):
+def depositar(saldo, valor, extrato, conta, /):
     if valor > 0:
         saldo += valor
-        extrato += f"Depósito: R$ {valor:.2f}\n"
+        movimento = {"tipo_operação": "Depósito", "valor": valor, "data": now.strftime("%d/%m/%Y %H:%M:%S")}
+        extrato.setdefault(conta, []).append(movimento)
         print("Depósito realizado com sucesso.")
         print(f"Saldo atual: R$ {saldo:.2f}")
         return saldo, extrato
@@ -45,12 +50,17 @@ def sacar(*, saldo, valor, extrato, limite, numero_saques, limite_saques):
     
     return saldo, extrato, numero_saques, limite, limite_saques, sucesso
         
-def exibir_extrato(saldo, /, *, extrato): 
-    print("\n================ EXTRATO ================")
+def exibir_extrato(saldo, /, *, extrato, conta): 
+    print(f'''\n================ EXTRATO ================
+          \nConta: {conta}''')
+    
     if not extrato:
         print("Não foram realizadas movimentações.")
     else:
-        print(extrato)
+        dados = extrato[conta]
+        for movimento in dados:
+            print(f"{movimento['data']} - {movimento['tipo_operação']}: R$ {movimento['valor']:.2f}")
+
     print(f"\nSaldo: R$ {saldo:.2f}")
     print("=========================================")
 
@@ -62,63 +72,114 @@ def registrar_usuario(nome, data_nascimento, cpf, endereco, usuarios):
                 "contas": []
     }
     usuarios.append(usuario)
-    print("Usuário registrado com sucesso.")
+    print("\nUsuário registrado com sucesso.")
     return usuarios
 
-def criar_conta(numero_agencia, numero_conta, usuario, contas):
+def criar_conta(numero_agencia, numero_conta, usuario, contas, cpf):
     conta = {
             "agencia": numero_agencia,
              "numero_conta": numero_conta,
-             "titular": usuario["nome"]}
+             "titular": usuario["nome"],
+             "cpf": cpf}
     contas.append(conta)
     usuario["contas"].append(conta)
-    print("Conta criada com sucesso.")
+    print("\nConta criada com sucesso.")
 
 def listar_contas(contas):
     for conta in contas:
-        print(f"{conta}\n")
+        print(f'''\n
+            Conta: {conta["numero_conta"]}\n
+            Agência: {conta["agencia"]}\n
+            Titular: {conta["titular"]}\n
+            CPF: {conta["cpf"]}\n\n\n''')
 
 def listar_usuarios(usuarios):
     for usuario in usuarios:
-        print(f"{usuario}\n")
+        contas = usuario.get("contas", [])
+        print(f'''\n
+            Nome: {usuario["nome"]}\n
+            cpf: {usuario["cpf"]}\n
+            Data de Nascimento: {usuario["data_nascimento"]}\n
+            Endereço: {usuario["endereco"]}\n
+            Contas:
+            ''')
+        for conta in contas:
+            print(f'''
+                Conta: {conta["numero_conta"]}\n
+                Agência: {conta["agencia"]}\n\n''')
+
 
 def main():
     saldo = 0
-    limite = 500
-    extrato = ""
+    LIMITE_VALOR_DIA = 500
+    extrato = {}
     numero_saques = 0
-    LIMITE_SAQUES = 3
+    LIMITE_SAQUES = 10
     NUMERO_AGENCIA = "0001"
     usuarios = [{"cpf": 123,
                  "nome": "Ana",
                  "data_nascimento": "01-01-2000",
                  "endereco": "Rua A, 123 - Centro - Rio de Janeiro/RJ",
-                 "contas":[]}]
-    contas = []
+                 "contas":[{"agencia": '0001',
+                            "numero_conta": 1,
+                            "titular": "Ana",
+                            "cpf": 123}]},
+                 {"cpf": 234,
+                  "nome": "Bruno",
+                  "data_nascimento": "02-02-1990",
+                  "endereco": "Avenida B, 456 - Sé - São Paulo/SP",
+                  "contas":[{"agencia": '0001',
+                            "numero_conta": 2,
+                            "titular": "Bruno",
+                            "cpf": 234}]}]
+    contas = [{"agencia": NUMERO_AGENCIA,
+               "numero_conta": 1,
+               "titular": "Ana",
+               "cpf": 123},
+               {"agencia": NUMERO_AGENCIA,
+                "numero_conta": 2,
+                "titular": "Bruno",
+                "cpf": 234}]
 
     while True:
         opcao = menu()
         if opcao == "d":
-            valor = float(input("Informe o valor do depósito: "))
-            saldo, extrato = depositar(saldo, valor, extrato)
+            conta = int(input("Informe o número da conta para depósito: "))
+            if conta not in [c["numero_conta"] for c in contas]:
+                print("Conta não encontrada.")
+                continue
+            else:
+                valor_str = input("Informe o valor do depósito ou digite x para voltar: ")
+                if valor_str.lower() == "x":
+                    continue
+                valor = float(valor_str)
+                saldo, extrato = depositar(saldo, valor, extrato, conta)
         elif opcao == "s":
             while True:
                 valor_str = input("Informe o valor do saque ou digite x para voltar: ")
                 if valor_str.lower() == "x":
                     break
                 valor = float(valor_str)
-                saldo, extrato, numero_saques, limite, LIMITE_SAQUES, sucesso = sacar(
+                saldo, extrato, numero_saques, LIMITE_VALOR_DIA, LIMITE_SAQUES, sucesso = sacar(
                     saldo=saldo,
                     valor=valor,
                     extrato=extrato,
-                    limite=limite,
+                    limite=LIMITE_VALOR_DIA,
                     numero_saques=numero_saques,
                     limite_saques=LIMITE_SAQUES,
                 )
                 if sucesso:
                     break
         elif opcao == "e":
-            exibir_extrato(saldo, extrato=extrato)
+            conta = int(input("Informe o número da conta para exibir o extrato: "))
+            if conta not in [c["numero_conta"] for c in contas]:
+                print("Conta não encontrada.")
+                continue
+            elif conta not in extrato:
+                print("\nNão foram realizadas movimentações para essa conta.")
+                continue
+            else:
+                exibir_extrato(saldo, extrato=extrato, conta=conta)
         elif opcao == "ru":
             cpf = int(input("Informe o CPF do novo cliente (somente números): "))
             cpf_existe = any(usuario.get("cpf") == cpf for usuario in usuarios)
@@ -135,7 +196,8 @@ def main():
                 if cliente.get("cpf") == cpf:
                     usuario = cliente
                     numero_conta = len(contas) + 1
-                    criar_conta(NUMERO_AGENCIA, numero_conta, usuario, contas)
+                    criar_conta(NUMERO_AGENCIA, numero_conta, usuario, contas, cpf)
+                    break
             else:
                 print("Usuário não encontrado, por favor registre o usuário antes de criar uma conta.")
         elif opcao == "lu":
