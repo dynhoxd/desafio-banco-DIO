@@ -18,7 +18,7 @@ def menu():
         [lu] Listar Usuários
         [lc] Listar Contas
         [x] Sair
-              \n=====================================\n
+              \n====================================\n
             => """)
 
 # @decorador_log
@@ -37,13 +37,15 @@ def depositar(saldo, valor, extrato, conta, /):
     return saldo, extrato
     
 def sacar(*, saldo, valor, extrato, limite_diario, numero_saques, limite_saques, conta):
-    sucesso = False
+    voltar_menu = False
     if valor > saldo:
         print("Operação falhou! Não há saldo suficiente.")
     elif valor > limite_diario:
         print("Operação falhou! O valor do saque excede o limite diário.")
+        voltar_menu = True
     elif numero_saques > limite_saques:
         print("Operação falhou! Número máximo de saques excedido.")
+        voltar_menu = True
     elif valor > 0:
         now = datetime.datetime.now()
         saldo -= valor
@@ -54,11 +56,11 @@ def sacar(*, saldo, valor, extrato, limite_diario, numero_saques, limite_saques,
         limite_saques -= 1
         print("Saque realizado com sucesso.")
         print(f"Saldo atual: R$ {saldo:.2f}")
-        sucesso = True
+        voltar_menu = True
     else:
         print("Operação falhou! O valor informado é inválido.")
     
-    return saldo, extrato, numero_saques, limite_diario, limite_saques, sucesso, conta
+    return saldo, extrato, numero_saques, limite_diario, limite_saques, voltar_menu
         
 def exibir_extrato(saldo, /, *, extrato, conta): 
     print(f'''\n================ EXTRATO ================
@@ -192,10 +194,10 @@ def main():
                         limite_saques = c['limite_saques']
                         valor_str = input("Informe o valor do saque ou digite x para voltar: ")
                         if valor_str.lower() == "x":
-                            sucesso = True
+                            voltar_menu = True
                             break
                         valor = float(valor_str)
-                        saldo, extrato, numero_saques, limite_diario, limite_saques, sucesso, conta = sacar(
+                        saldo, extrato, numero_saques, limite_diario, limite_saques, voltar_menu = sacar(
                         saldo=saldo,
                         valor=valor,
                         extrato=extrato,
@@ -204,13 +206,13 @@ def main():
                         limite_saques=limite_saques,
                         conta=conta
                         )
-                        print(sucesso)
                         for c in contas:
                             if c["numero_conta"] == conta:
                                 c["saldo"] = saldo
                                 c["limite_saques"] = limite_saques
                                 c["numero_saques"] = numero_saques
-                if sucesso:
+                                c["limite_valor_saque_dia"] = limite_diario
+                if voltar_menu:
                     break
         elif opcao == "e":
             conta = int(input("Informe o número da conta para exibir o extrato: "))
@@ -221,6 +223,9 @@ def main():
                 print("\nNão foram realizadas movimentações para essa conta.")
                 continue
             else:
+                for c in contas:
+                    if c["numero_conta"] == conta:
+                        saldo = c["saldo"]
                 exibir_extrato(saldo, extrato=extrato, conta=conta)
         elif opcao == "ru":
             cpf = int(input("Informe o CPF do novo cliente (somente números): "))
