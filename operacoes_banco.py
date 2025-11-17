@@ -1,8 +1,11 @@
-# import datetime
-# now = datetime.datetime.now()
+import datetime
 
-# def decorador_log(func): 
-#     return print(f'{now.strftime("%d/%m/%Y %H:%M:%S")} - a ação de {func.__name__} é executada.')
+def decorador_log(func): 
+    def print_log(*args, **kwargs):
+        now = datetime.datetime.now()
+        func(*args, **kwargs)    
+        print(f'{now.strftime("%d/%m/%Y %H:%M:%S")} - a ação de {func.__name__} é executada.')
+    return print_log
 
 def menu():
     return input("""\n========= MENU DE OPERAÇÕES =========\n
@@ -21,15 +24,17 @@ def menu():
 # @decorador_log
 def depositar(saldo, valor, extrato, conta, /):
     if valor > 0:
+        now = datetime.datetime.now()
         saldo += valor
         movimento = {"tipo_operação": "Depósito", "valor": valor, "data": now.strftime("%d/%m/%Y %H:%M:%S")}
         extrato.setdefault(conta, []).append(movimento)
         print("Depósito realizado com sucesso.")
         print(f"Saldo atual: R$ {saldo:.2f}")
-        return saldo, extrato
+        # return saldo, extrato
     else:
         print("Operação falhou! O valor informado é inválido.")
-        return saldo, extrato
+        # return saldo, extrato
+    return saldo, extrato
     
 def sacar(*, saldo, valor, extrato, limite_diario, numero_saques, limite_saques, conta):
     sucesso = False
@@ -40,8 +45,9 @@ def sacar(*, saldo, valor, extrato, limite_diario, numero_saques, limite_saques,
     elif numero_saques > limite_saques:
         print("Operação falhou! Número máximo de saques excedido.")
     elif valor > 0:
+        now = datetime.datetime.now()
         saldo -= valor
-        movimento = {"tipo_operação": "Depósito", "valor": valor, "data": now.strftime("%d/%m/%Y %H:%M:%S")}
+        movimento = {"tipo_operação": "Saque", "valor": valor, "data": now.strftime("%d/%m/%Y %H:%M:%S")}
         extrato.setdefault(conta, []).append(movimento)
         numero_saques += 1
         limite_diario -= valor
@@ -95,7 +101,6 @@ def listar_contas(contas):
         limite_conta = conta['limite_valor_saque_dia']
         if limite_conta > conta['saldo']:
             limite_conta = conta['saldo']
-        print(conta['limite_saques'], conta['numero_saques'])
         print(f'''\n
             Conta: {conta["numero_conta"]}\n
             Agência: {conta["agencia"]}\n
@@ -170,7 +175,6 @@ def main():
                 for c in contas:
                     if c["numero_conta"] == conta:
                         saldo = c["saldo"]
-                        print(saldo)
                         valor = float(valor_str)
                         saldo, extrato = depositar(saldo, valor, extrato, conta)
                         c["saldo"] = saldo
