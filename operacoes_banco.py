@@ -65,19 +65,25 @@ def sacar(*, saldo, valor, extrato, limite_diario, numero_saques, limite_saques,
     return saldo, extrato, numero_saques, limite_diario, limite_saques, voltar_menu
 
 @decorador_log        
-def exibir_extrato(saldo, /, *, extrato, conta): 
-    print(f'''\n================ EXTRATO ================
-          \nConta: {conta}''')
+def exibir_extrato(saldo, /, *, extrato, conta, tipo_operacao):
     
-    if not extrato:
-        print("Não foram realizadas movimentações.")
-    else:
-        dados = extrato[conta]
-        for movimento in dados:
-            print(f"{movimento['data']} - {movimento['tipo_operação']}: R$ {movimento['valor']:.2f}")
+    def filtro_operacoes():
+        for operacoes in extrato[conta]:
+            if tipo_operacao == 'd' and operacoes['tipo_operação'] == 'Depósito':
+                yield operacoes
+            elif tipo_operacao == 's' and operacoes['tipo_operação'] == 'Saque':
+                yield operacoes
+            elif tipo_operacao == 't':
+                yield operacoes
+        
+    op_filtradas = filtro_operacoes()
+    print(f'''\n================ EXTRATO ================
+            \nConta: {conta}''')
+    for operacao in op_filtradas:
+        print(f"{operacao['data']} - {operacao['tipo_operação']}: R$ {operacao['valor']:.2f}")
+    print(f''' \nSaldo: R$ {saldo:.2f}
+                \n========================================= ''')
 
-    print(f"\nSaldo: R$ {saldo:.2f}")
-    print("=========================================")
 
 @decorador_log
 def registrar_usuario(nome, data_nascimento, cpf, endereco, usuarios):
@@ -198,14 +204,14 @@ def main():
                     continue
                 for c in contas:
                     if c["numero_conta"] == conta:
-                        saldo = c["saldo"]
-                        limite_diario = c['limite_valor_saque_dia']
-                        numero_saques = c['numero_saques']
-                        limite_saques = c['limite_saques']
                         valor_str = input("Informe o valor do saque ou digite x para voltar: ")
                         if valor_str.lower() == "x":
                             voltar_menu = True
                             break
+                        saldo = c["saldo"]
+                        limite_diario = c['limite_valor_saque_dia']
+                        numero_saques = c['numero_saques']
+                        limite_saques = c['limite_saques']
                         valor = float(valor_str)
                         saldo, extrato, numero_saques, limite_diario, limite_saques, voltar_menu = sacar(
                         saldo=saldo,
@@ -236,7 +242,8 @@ def main():
                 for c in contas:
                     if c["numero_conta"] == conta:
                         saldo = c["saldo"]
-                exibir_extrato(saldo, extrato=extrato, conta=conta)
+                tipo_operacao = input("Deseja filtrar o extrato por tipo de operação?\n\n (d) Depósito\n (s) Saque\n (t) Todos - Sem filtros\n\n => ").lower()
+                exibir_extrato(saldo, extrato=extrato, conta=conta, tipo_operacao=tipo_operacao)
         elif opcao == "ru":
             cpf = int(input("Informe o CPF do novo cliente (somente números): "))
             cpf_existe = any(usuario.get("cpf") == cpf for usuario in usuarios)
