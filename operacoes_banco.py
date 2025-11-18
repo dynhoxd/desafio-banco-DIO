@@ -1,11 +1,12 @@
 import datetime
 
 def decorador_log(func): 
-    def print_log(*args, **kwargs):
+    def print_hora(*args, **kwargs):
         now = datetime.datetime.now()
-        func(*args, **kwargs)    
-        print(f'{now.strftime("%d/%m/%Y %H:%M:%S")} - a ação de {func.__name__} é executada.')
-    return print_log
+        f = func(*args, **kwargs)    
+        print(f'\n{now.strftime("%d/%m/%Y %H:%M:%S")} - a ação de {func.__name__} é executada.')
+        return f
+    return print_hora  
 
 def menu():
     return input("""\n========= MENU DE OPERAÇÕES =========\n
@@ -21,7 +22,7 @@ def menu():
               \n====================================\n
             => """)
 
-# @decorador_log
+@decorador_log
 def depositar(saldo, valor, extrato, conta, /):
     if valor > 0:
         now = datetime.datetime.now()
@@ -35,7 +36,8 @@ def depositar(saldo, valor, extrato, conta, /):
         print("Operação falhou! O valor informado é inválido.")
         # return saldo, extrato
     return saldo, extrato
-    
+
+@decorador_log   
 def sacar(*, saldo, valor, extrato, limite_diario, numero_saques, limite_saques, conta):
     voltar_menu = False
     if valor > saldo:
@@ -61,7 +63,8 @@ def sacar(*, saldo, valor, extrato, limite_diario, numero_saques, limite_saques,
         print("Operação falhou! O valor informado é inválido.")
     
     return saldo, extrato, numero_saques, limite_diario, limite_saques, voltar_menu
-        
+
+@decorador_log        
 def exibir_extrato(saldo, /, *, extrato, conta): 
     print(f'''\n================ EXTRATO ================
           \nConta: {conta}''')
@@ -76,6 +79,7 @@ def exibir_extrato(saldo, /, *, extrato, conta):
     print(f"\nSaldo: R$ {saldo:.2f}")
     print("=========================================")
 
+@decorador_log
 def registrar_usuario(nome, data_nascimento, cpf, endereco, usuarios):
     usuario = {"cpf":cpf, 
                 "nome": nome,
@@ -87,17 +91,22 @@ def registrar_usuario(nome, data_nascimento, cpf, endereco, usuarios):
     print("\nUsuário registrado com sucesso.")
     return usuarios
 
+@decorador_log
 def criar_conta(numero_agencia, numero_conta, usuario, contas, cpf):
     conta = {
             "agencia": numero_agencia,
-             "numero_conta": numero_conta,
-             'saldo': 0,
-             "titular": usuario["nome"],
-             "cpf": cpf}
+            "numero_conta": numero_conta,
+            'saldo': 0,
+            "limite_valor_saque_dia": 500,
+            "numero_saques": 0,
+            "limite_saques": 10,
+            "titular": usuario["nome"],
+            "cpf": cpf}
     contas.append(conta)
     usuario["contas"].append(conta)
     print("\nConta criada com sucesso.")
 
+@decorador_log
 def listar_contas(contas):
     for conta in contas:
         limite_conta = conta['limite_valor_saque_dia']
@@ -111,6 +120,7 @@ def listar_contas(contas):
             Titular: {conta["titular"]}\n
             CPF: {conta["cpf"]}\n\n\n''')
 
+@decorador_log
 def listar_usuarios(usuarios):
     for usuario in usuarios:
         contas = usuario.get("contas", [])
