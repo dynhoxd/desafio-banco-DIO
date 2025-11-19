@@ -15,7 +15,7 @@ def menu():
         [s] Sacar
         [e] Extrato
         [ru] Registrar Usuário
-        [cc] Criar Conta
+        [rc] Registrar Conta
         [lu] Listar Usuários
         [lc] Listar Contas
         [x] Sair
@@ -38,14 +38,14 @@ def depositar(saldo, valor, extrato, conta, /):
     return saldo, extrato
 
 @decorador_log   
-def sacar(*, saldo, valor, extrato, limite_diario, numero_saques, limite_saques, conta):
+def sacar(*, saldo, valor, extrato, limite_diario, saques_efetuados_hoje, limite_saques_disponivel_dia, conta):
     voltar_menu = False
     if valor > saldo:
         print("Operação falhou! Não há saldo suficiente.")
     elif valor > limite_diario:
         print("Operação falhou! O valor do saque excede o limite diário.")
         voltar_menu = True
-    elif numero_saques > limite_saques:
+    elif saques_efetuados_hoje > limite_saques_disponivel_dia:
         print("Operação falhou! Número máximo de saques excedido.")
         voltar_menu = True
     elif valor > 0:
@@ -53,16 +53,16 @@ def sacar(*, saldo, valor, extrato, limite_diario, numero_saques, limite_saques,
         saldo -= valor
         movimento = {"tipo_operação": "Saque", "valor": valor, "data": now.strftime("%d/%m/%Y %H:%M:%S")}
         extrato.setdefault(conta, []).append(movimento)
-        numero_saques += 1
+        saques_efetuados_hoje += 1
         limite_diario -= valor
-        limite_saques -= 1
+        limite_saques_disponivel_dia -= 1
         print("Saque realizado com sucesso.")
         print(f"Saldo atual: R$ {saldo:.2f}")
         voltar_menu = True
     else:
         print("Operação falhou! O valor informado é inválido.")
     
-    return saldo, extrato, numero_saques, limite_diario, limite_saques, voltar_menu
+    return saldo, extrato, saques_efetuados_hoje, limite_diario, limite_saques_disponivel_dia, voltar_menu
 
 @decorador_log        
 def exibir_extrato(saldo, /, *, extrato, conta, tipo_operacao):
@@ -73,7 +73,7 @@ def exibir_extrato(saldo, /, *, extrato, conta, tipo_operacao):
                 yield operacoes
             elif tipo_operacao == 's' and operacoes['tipo_operação'] == 'Saque':
                 yield operacoes
-            elif tipo_operacao == 't':
+            elif tipo_operacao == '':
                 yield operacoes
         
     op_filtradas = filtro_operacoes()
@@ -83,7 +83,6 @@ def exibir_extrato(saldo, /, *, extrato, conta, tipo_operacao):
         print(f"{operacao['data']} - {operacao['tipo_operação']}: R$ {operacao['valor']:.2f}")
     print(f''' \nSaldo: R$ {saldo:.2f}
                 \n========================================= ''')
-
 
 @decorador_log
 def registrar_usuario(nome, data_nascimento, cpf, endereco, usuarios):
@@ -98,14 +97,14 @@ def registrar_usuario(nome, data_nascimento, cpf, endereco, usuarios):
     return usuarios
 
 @decorador_log
-def criar_conta(numero_agencia, numero_conta, usuario, contas, cpf):
+def registrar_conta(numero_agencia, numero_conta, usuario, contas, cpf):
     conta = {
             "agencia": numero_agencia,
             "numero_conta": numero_conta,
             'saldo': 0,
             "limite_valor_saque_dia": 500,
-            "numero_saques": 0,
-            "limite_saques": 10,
+            "saques_efetuados_hoje": 0,
+            "limite_saques_disponivel_dia": 10,
             "titular": usuario["nome"],
             "cpf": cpf}
     contas.append(conta)
@@ -114,17 +113,19 @@ def criar_conta(numero_agencia, numero_conta, usuario, contas, cpf):
 
 @decorador_log
 def listar_contas(contas):
-    for conta in contas:
-        limite_conta = conta['limite_valor_saque_dia']
-        if limite_conta > conta['saldo']:
-            limite_conta = conta['saldo']
-        print(f'''\n
-            Conta: {conta["numero_conta"]}\n
-            Agência: {conta["agencia"]}\n
-            Saldo: R$ {conta["saldo"]:.2f}\n
-            Limite disponível para saque hoje: R$ {limite_conta:.2f}\n
-            Titular: {conta["titular"]}\n
-            CPF: {conta["cpf"]}\n\n\n''')
+    iterador = iter(contas)
+    while True:
+        try:
+            conta = next(iterador)
+            print(f'''\n
+                Conta: {conta["numero_conta"]}\n
+                Agência: {conta["agencia"]}\n
+                Saldo: R$ {conta["saldo"]:.2f}\n
+                Limite disponível para saque hoje: R$ {conta["limite_valor_saque_dia"]:.2f}\n
+                Titular: {conta["titular"]}\n
+                CPF: {conta["cpf"]}\n\n\n''')
+        except StopIteration:
+            break
 
 @decorador_log
 def listar_usuarios(usuarios):
@@ -146,7 +147,7 @@ def listar_usuarios(usuarios):
 def main():
     extrato = {}
     NUMERO_AGENCIA = "0001"
-    usuarios = [{"cpf": 123,
+    usuarios = [{"cpf": "123",
                  "nome": "Ana",
                  "data_nascimento": "01-01-2000",
                  "endereco": "Rua A, 123 - Centro - Rio de Janeiro/RJ",
@@ -154,7 +155,7 @@ def main():
                             "numero_conta": 1,
                             "titular": "Ana",
                             "cpf": 123}]},
-                 {"cpf": 234,
+                 {"cpf": "234",
                   "nome": "Bruno",
                   "data_nascimento": "02-02-1990",
                   "endereco": "Avenida B, 456 - Sé - São Paulo/SP",
@@ -166,18 +167,18 @@ def main():
                "numero_conta": 1,
                "saldo": 1000,
                "limite_valor_saque_dia": 500,
-               "numero_saques": 0,
-               "limite_saques": 10,
+               "saques_efetuados_hoje": 0,
+               "limite_saques_disponivel_dia": 10,
                "titular": "Ana",
-               "cpf": 123},
+               "cpf": "123"},
                {"agencia": NUMERO_AGENCIA,
                 "numero_conta": 2,
                 "saldo": 300,
                 "limite_valor_saque_dia": 500,
-                "numero_saques": 0,
-                "limite_saques": 10,
+                "saques_efetuados_hoje": 0,
+                "limite_saques_disponivel_dia": 10,
                 "titular": "Bruno",
-                "cpf": 234}]
+                "cpf": "234"}]
 
     while True:
         opcao = menu()
@@ -210,23 +211,23 @@ def main():
                             break
                         saldo = c["saldo"]
                         limite_diario = c['limite_valor_saque_dia']
-                        numero_saques = c['numero_saques']
-                        limite_saques = c['limite_saques']
+                        saques_efetuados_hoje = c['saques_efetuados_hoje']
+                        limite_saques_disponivel_dia = c['limite_saques_disponivel_dia']
                         valor = float(valor_str)
-                        saldo, extrato, numero_saques, limite_diario, limite_saques, voltar_menu = sacar(
+                        saldo, extrato, saques_efetuados_hoje, limite_diario, limite_saques_disponivel_dia, voltar_menu = sacar(
                         saldo=saldo,
                         valor=valor,
                         extrato=extrato,
                         limite_diario=limite_diario,
-                        numero_saques=numero_saques,
-                        limite_saques=limite_saques,
+                        saques_efetuados_hoje=saques_efetuados_hoje,
+                        limite_saques_disponivel_dia=limite_saques_disponivel_dia,
                         conta=conta
                         )
                         for c in contas:
                             if c["numero_conta"] == conta:
                                 c["saldo"] = saldo
-                                c["limite_saques"] = limite_saques
-                                c["numero_saques"] = numero_saques
+                                c["limite_saques_disponivel_dia"] = limite_saques_disponivel_dia
+                                c["saques_efetuados_hoje"] = saques_efetuados_hoje
                                 c["limite_valor_saque_dia"] = limite_diario
                 if voltar_menu:
                     break
@@ -239,13 +240,14 @@ def main():
                 print("\nNão foram realizadas movimentações para essa conta.")
                 continue
             else:
-                for c in contas:
-                    if c["numero_conta"] == conta:
-                        saldo = c["saldo"]
-                tipo_operacao = input("Deseja filtrar o extrato por tipo de operação?\n\n (d) Depósito\n (s) Saque\n (t) Todos - Sem filtros\n\n => ").lower()
+                saldo = next(c["saldo"] for c in contas if c["numero_conta"] == conta)
+                # for c in contas:
+                #     if c["numero_conta"] == conta:
+                #         saldo = c["saldo"]
+                tipo_operacao = input("\n\nDeseja filtrar o extrato por tipo de operação?\n\n (d) Depósitos\n (s) Saques\n     Ou pressione Enter para exibir todos\n\n => ").lower()
                 exibir_extrato(saldo, extrato=extrato, conta=conta, tipo_operacao=tipo_operacao)
         elif opcao == "ru":
-            cpf = int(input("Informe o CPF do novo cliente (somente números): "))
+            cpf = input("Informe o CPF do novo cliente (somente números): ")
             cpf_existe = any(usuario.get("cpf") == cpf for usuario in usuarios)
             if cpf_existe:
                 print("Já existe um usuário com esse CPF.")
@@ -254,13 +256,13 @@ def main():
                 data_nascimento = input("Informe a data de nascimento do novo cliente (DD-MM-AAAA): ")
                 endereco = input("Informe o endereço do novo cliente (logradouro, número - bairro - cidade/sigla estado): ")
                 usuarios = registrar_usuario(nome, data_nascimento, cpf, endereco, usuarios)
-        elif opcao == "cc":
-            cpf = int(input("Informe o cpf do usuário titular da nova conta: "))
+        elif opcao == "rc":
+            cpf = input("Informe o cpf do usuário titular da nova conta: ")
             for cliente in usuarios:
                 if cliente.get("cpf") == cpf:
                     usuario = cliente
                     numero_conta = len(contas) + 1
-                    criar_conta(NUMERO_AGENCIA, numero_conta, usuario, contas, cpf)
+                    registrar_conta(NUMERO_AGENCIA, numero_conta, usuario, contas, cpf)
                     break
             else:
                 print("Usuário não encontrado, por favor registre o usuário antes de criar uma conta.")
@@ -286,8 +288,8 @@ main()
 # saldo = 0
 # limite = 500
 # extrato = ""
-# numero_saques = 0
-# LIMITE_SAQUES = 3
+# saques_efetuados_hoje = 0
+# limite_saques_disponivel_dia = 3
 
 # while True:
 
@@ -310,7 +312,7 @@ main()
 
 #         excedeu_limite = valor > limite
 
-#         excedeu_saques = numero_saques >= LIMITE_SAQUES
+#         excedeu_saques = saques_efetuados_hoje >= limite_saques_disponivel_dia
 
 #         if excedeu_saldo:
 #             print("Operação falhou! Você não tem saldo suficiente.")
@@ -324,7 +326,7 @@ main()
 #         elif valor > 0:
 #             saldo -= valor
 #             extrato += f"Saque: R$ {valor:.2f}\n"
-#             numero_saques += 1
+#             saques_efetuados_hoje += 1
 
 #         else:
 #             print("Operação falhou! O valor informado é inválido.")
