@@ -234,45 +234,6 @@ def main():
                         break
                 if voltar_menu:
                     break
-                
-
-                    
-
-                    
-
-
-
-                # if conta not in [c["numero_conta"] for c in contas]:
-                #     print("Conta não encontrada.")
-                #     continue
-                # for c in contas:
-                #     if c["numero_conta"] == conta:
-                #         valor_str = input("Informe o valor do saque ou digite x para voltar: ")
-                #         if valor_str.lower() == "x":
-                #             voltar_menu = True
-                #             break
-                #         saldo = c["saldo"]
-                #         limite_diario = c['limite_valor_saque_dia']
-                #         saques_efetuados_hoje = c['saques_efetuados_hoje']
-                #         limite_saques_disponivel_dia = c['limite_saques_disponivel_dia']
-                #         valor = float(valor_str)
-                #         saldo, extrato, saques_efetuados_hoje, limite_diario, limite_saques_disponivel_dia, voltar_menu = sacar(
-                #         saldo=saldo,
-                #         valor=valor,
-                #         extrato=extrato,
-                #         limite_diario=limite_diario,
-                #         saques_efetuados_hoje=saques_efetuados_hoje,
-                #         limite_saques_disponivel_dia=limite_saques_disponivel_dia,
-                #         conta=conta
-                #         )
-                #         for c in contas:
-                #             if c["numero_conta"] == conta:
-                #                 c["saldo"] = saldo
-                #                 c["limite_saques_disponivel_dia"] = limite_saques_disponivel_dia
-                #                 c["saques_efetuados_hoje"] = saques_efetuados_hoje
-                #                 c["limite_valor_saque_dia"] = limite_diario
-                # if voltar_menu:
-                #     break
         elif opcao == "e":
             conta = int(input("Informe o número da conta para exibir o extrato: "))
             if conta not in [c["numero_conta"] for c in contas]:
