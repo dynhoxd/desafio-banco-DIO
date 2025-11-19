@@ -200,37 +200,79 @@ def main():
         elif opcao == "s":
             while True:
                 conta = int(input("Informe o número da conta para saque: "))
-                if conta not in [c["numero_conta"] for c in contas]:
-                    print("Conta não encontrada.")
-                    continue
-                for c in contas:
-                    if c["numero_conta"] == conta:
-                        valor_str = input("Informe o valor do saque ou digite x para voltar: ")
-                        if valor_str.lower() == "x":
+                s_iterator = iter(contas)
+                while True:
+                    try:
+                        c = next(s_iterator)
+                        if conta == c["numero_conta"]:
+                            valor_str = input("Informe o valor do saque ou digite x para voltar: ")
+                            if valor_str.lower() == "x":
+                                voltar_menu = True
+                                break
+                            saldo = c["saldo"]
+                            limite_diario = c['limite_valor_saque_dia']
+                            saques_efetuados_hoje = c['saques_efetuados_hoje']
+                            limite_saques_disponivel_dia = c['limite_saques_disponivel_dia']
+                            valor = float(valor_str)
+                            saldo, extrato, saques_efetuados_hoje, limite_diario, limite_saques_disponivel_dia, voltar_menu = sacar(
+                            saldo=saldo,
+                            valor=valor,
+                            extrato=extrato,
+                            limite_diario=limite_diario,
+                            saques_efetuados_hoje=saques_efetuados_hoje,
+                            limite_saques_disponivel_dia=limite_saques_disponivel_dia,
+                            conta=conta)
+                            c["saldo"] = saldo
+                            c["limite_saques_disponivel_dia"] = limite_saques_disponivel_dia
+                            c["saques_efetuados_hoje"] = saques_efetuados_hoje
+                            c["limite_valor_saque_dia"] = limite_diario
                             voltar_menu = True
                             break
-                        saldo = c["saldo"]
-                        limite_diario = c['limite_valor_saque_dia']
-                        saques_efetuados_hoje = c['saques_efetuados_hoje']
-                        limite_saques_disponivel_dia = c['limite_saques_disponivel_dia']
-                        valor = float(valor_str)
-                        saldo, extrato, saques_efetuados_hoje, limite_diario, limite_saques_disponivel_dia, voltar_menu = sacar(
-                        saldo=saldo,
-                        valor=valor,
-                        extrato=extrato,
-                        limite_diario=limite_diario,
-                        saques_efetuados_hoje=saques_efetuados_hoje,
-                        limite_saques_disponivel_dia=limite_saques_disponivel_dia,
-                        conta=conta
-                        )
-                        for c in contas:
-                            if c["numero_conta"] == conta:
-                                c["saldo"] = saldo
-                                c["limite_saques_disponivel_dia"] = limite_saques_disponivel_dia
-                                c["saques_efetuados_hoje"] = saques_efetuados_hoje
-                                c["limite_valor_saque_dia"] = limite_diario
+                    except StopIteration:
+                        print("Conta não encontrada.")
+                        voltar_menu = True
+                        break
                 if voltar_menu:
                     break
+                
+
+                    
+
+                    
+
+
+
+                # if conta not in [c["numero_conta"] for c in contas]:
+                #     print("Conta não encontrada.")
+                #     continue
+                # for c in contas:
+                #     if c["numero_conta"] == conta:
+                #         valor_str = input("Informe o valor do saque ou digite x para voltar: ")
+                #         if valor_str.lower() == "x":
+                #             voltar_menu = True
+                #             break
+                #         saldo = c["saldo"]
+                #         limite_diario = c['limite_valor_saque_dia']
+                #         saques_efetuados_hoje = c['saques_efetuados_hoje']
+                #         limite_saques_disponivel_dia = c['limite_saques_disponivel_dia']
+                #         valor = float(valor_str)
+                #         saldo, extrato, saques_efetuados_hoje, limite_diario, limite_saques_disponivel_dia, voltar_menu = sacar(
+                #         saldo=saldo,
+                #         valor=valor,
+                #         extrato=extrato,
+                #         limite_diario=limite_diario,
+                #         saques_efetuados_hoje=saques_efetuados_hoje,
+                #         limite_saques_disponivel_dia=limite_saques_disponivel_dia,
+                #         conta=conta
+                #         )
+                #         for c in contas:
+                #             if c["numero_conta"] == conta:
+                #                 c["saldo"] = saldo
+                #                 c["limite_saques_disponivel_dia"] = limite_saques_disponivel_dia
+                #                 c["saques_efetuados_hoje"] = saques_efetuados_hoje
+                #                 c["limite_valor_saque_dia"] = limite_diario
+                # if voltar_menu:
+                #     break
         elif opcao == "e":
             conta = int(input("Informe o número da conta para exibir o extrato: "))
             if conta not in [c["numero_conta"] for c in contas]:
@@ -248,7 +290,16 @@ def main():
                 exibir_extrato(saldo, extrato=extrato, conta=conta, tipo_operacao=tipo_operacao)
         elif opcao == "ru":
             cpf = input("Informe o CPF do novo cliente (somente números): ")
-            cpf_existe = any(usuario.get("cpf") == cpf for usuario in usuarios)
+            ru_user_iterator = iter(usuarios)
+            while True:
+                try:
+                    usuario = next(ru_user_iterator)
+                    if usuario.get("cpf") == cpf:
+                        cpf_existe = True
+                        break
+                except StopIteration:
+                    cpf_existe = False
+                    break
             if cpf_existe:
                 print("Já existe um usuário com esse CPF.")
             else:
@@ -258,14 +309,17 @@ def main():
                 usuarios = registrar_usuario(nome, data_nascimento, cpf, endereco, usuarios)
         elif opcao == "rc":
             cpf = input("Informe o cpf do usuário titular da nova conta: ")
-            for cliente in usuarios:
-                if cliente.get("cpf") == cpf:
-                    usuario = cliente
-                    numero_conta = len(contas) + 1
-                    registrar_conta(NUMERO_AGENCIA, numero_conta, usuario, contas, cpf)
+            rc_user_iterator = iter(usuarios)
+            while True:
+                try:
+                    usuario = next(rc_user_iterator)
+                    if usuario.get("cpf") == cpf:
+                        numero_conta = len(contas) + 1
+                        registrar_conta(NUMERO_AGENCIA, numero_conta, usuario, contas, cpf)
+                        break
+                except StopIteration:
+                    print("Usuário não encontrado, por favor registre o usuário antes de criar uma conta.")
                     break
-            else:
-                print("Usuário não encontrado, por favor registre o usuário antes de criar uma conta.")
         elif opcao == "lu":
             listar_usuarios(usuarios)
         elif opcao == "lc":
