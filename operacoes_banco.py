@@ -1,15 +1,23 @@
 import datetime
+import textwrap
+from pathlib import Path
+ROOT_PATH = Path(__file__).parent
 
 def decorador_log(func): 
-    def print_hora(*args, **kwargs):
+    def faz_log(*args, **kwargs):
         now = datetime.datetime.now()
         f = func(*args, **kwargs)    
-        print(f'\n{now.strftime("%d/%m/%Y %H:%M:%S")} - a ação de {func.__name__} é executada.')
+        # print(f'\n{now.strftime("%d/%m/%Y %H:%M:%S")} - a ação de {func.__name__} é executada.')
+        try:
+            with open(ROOT_PATH / "log.txt", "a", encoding="utf-8") as arquivo_log:
+                arquivo_log.write(f'{now.strftime("%d/%m/%Y %H:%M:%S")}, {func.__name__}, [{args}, {kwargs}], {f} \n')
+        except Exception as exc:
+            print(f"Erro ao tentar registrar a ação.\nErro:{exc}")
         return f
-    return print_hora  
+    return faz_log  
 
 def menu():
-    return input("""\n========= MENU DE OPERAÇÕES =========\n
+    return input("""\n=========== MENU DE OPERAÇÕES ===========\n
         escolha uma opção: \n
         [d] Depositar
         [s] Sacar
@@ -19,8 +27,8 @@ def menu():
         [lu] Listar Usuários
         [lc] Listar Contas
         [x] Sair
-              \n====================================\n
-            => """)
+              \n========================================\n
+    => """)
 
 @decorador_log
 def depositar(saldo, valor, extrato, conta, /):
@@ -109,7 +117,7 @@ def registrar_conta(numero_agencia, numero_conta, usuario, contas, cpf):
             "cpf": cpf}
     contas.append(conta)
     usuario["contas"].append(conta)
-    print("\nConta criada com sucesso.")
+    print(f"\nA conta n° {numero_conta} da agência {numero_agencia} foi criada para o(a) cliente {usuario["nome"]}.")
 
 @decorador_log
 def listar_contas(contas):
@@ -117,38 +125,44 @@ def listar_contas(contas):
     while True:
         try:
             conta = next(iterador)
-            print(f'''\n
+            print(textwrap.dedent(f'''\n
                 Conta: {conta["numero_conta"]}\n
                 Agência: {conta["agencia"]}\n
                 Saldo: R$ {conta["saldo"]:.2f}\n
                 Limite disponível para saque hoje: R$ {conta["limite_valor_saque_dia"]:.2f}\n
                 Titular: {conta["titular"]}\n
-                CPF: {conta["cpf"]}\n\n\n''')
+                CPF: {conta["cpf"]}\n\n\n'''))
         except StopIteration:
             break
 
 @decorador_log
 def listar_usuarios(usuarios):
-    for usuario in usuarios:
-        contas = usuario.get("contas", [])
-        print(f'''\n
-            Nome: {usuario["nome"]}\n
-            cpf: {usuario["cpf"]}\n
-            Data de Nascimento: {usuario["data_nascimento"]}\n
-            Endereço: {usuario["endereco"]}\n
-            Contas:
-            ''')
-        for conta in contas:
-            print(f'''
-                Conta: {conta["numero_conta"]}\n
-                Agência: {conta["agencia"]}\n\n''')
-
+        user_interator = iter(usuarios)
+        while True:
+            try:
+                usuario = next(user_interator)
+                print(textwrap.dedent(f'''\n
+                Nome: {usuario["nome"]}\n
+                cpf: {usuario["cpf"]}\n
+                Data de Nascimento: {usuario["data_nascimento"]}\n
+                Endereço: {usuario["endereco"]}\n
+                Contas:
+                '''))
+                contas = usuario.get("contas", [])
+                for conta in contas:
+                    print(textwrap.dedent(f'''
+                    N° da conta: {conta["numero_conta"]}\n
+                    Agência: {conta["agencia"]}\n\n'''))
+                print("\n----------------------------------------\n")
+            except StopIteration:
+                break
 
 def main():
     extrato = {}
+    contagem_contas = 2
     NUMERO_AGENCIA = "0001"
     usuarios = [{"cpf": "123",
-                 "nome": "Ana",
+                 "nome": "Ana Pereira",
                  "data_nascimento": "01-01-2000",
                  "endereco": "Rua A, 123 - Centro - Rio de Janeiro/RJ",
                  "contas":[{"agencia": '0001',
@@ -156,7 +170,7 @@ def main():
                             "titular": "Ana",
                             "cpf": 123}]},
                  {"cpf": "234",
-                  "nome": "Bruno",
+                  "nome": "Bruno Cardoso",
                   "data_nascimento": "02-02-1990",
                   "endereco": "Avenida B, 456 - Sé - São Paulo/SP",
                   "contas":[{"agencia": '0001',
@@ -275,11 +289,12 @@ def main():
                 try:
                     usuario = next(rc_user_iterator)
                     if usuario.get("cpf") == cpf:
-                        numero_conta = len(contas) + 1
+                        contagem_contas += 1
+                        numero_conta = contagem_contas
                         registrar_conta(NUMERO_AGENCIA, numero_conta, usuario, contas, cpf)
                         break
                 except StopIteration:
-                    print("Usuário não encontrado, por favor registre o usuário antes de criar uma conta.")
+                    print("Usuário não encontrado. Por favor, registre o usuário antes de criar uma conta!")
                     break
         elif opcao == "lu":
             listar_usuarios(usuarios)
