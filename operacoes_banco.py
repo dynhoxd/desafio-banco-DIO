@@ -7,10 +7,9 @@ def decorador_log(func):
     def faz_log(*args, **kwargs):
         now = datetime.datetime.now()
         f = func(*args, **kwargs)    
-        # print(f'\n{now.strftime("%d/%m/%Y %H:%M:%S")} - a ação de {func.__name__} é executada.')
         try:
             with open(ROOT_PATH / "log.txt", "a", encoding="utf-8") as arquivo_log:
-                arquivo_log.write(f'{now.strftime("%d/%m/%Y %H:%M:%S")}, {func.__name__}, [{args}, {kwargs}], {f} \n')
+                arquivo_log.write(f'{now.strftime("%d/%m/%Y %H:%M:%S")}, a função {func.__name__} foi executada com os argumentos: [{args}, {kwargs}], e retornou {f} \n')
         except Exception as exc:
             print(f"Erro ao tentar registrar a ação.\nErro:{exc}")
         return f
@@ -195,7 +194,7 @@ def main():
                 "cpf": "234"}]
 
     while True:
-        opcao = menu()
+        opcao = menu().lower()
         if opcao == "d":
             conta = int(input("Informe o número da conta para depósito: "))
             if conta not in [c["numero_conta"] for c in contas]:
@@ -219,8 +218,8 @@ def main():
                     try:
                         c = next(s_iterator)
                         if conta == c["numero_conta"]:
-                            valor_str = input("Informe o valor do saque ou digite x para voltar: ")
-                            if valor_str.lower() == "x":
+                            valor_str = input("Informe o valor do saque ou digite x para voltar: ").lower()
+                            if valor_str == "x":
                                 voltar_menu = True
                                 break
                             saldo = c["saldo"]
