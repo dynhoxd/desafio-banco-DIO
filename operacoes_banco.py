@@ -3,13 +3,18 @@ import textwrap
 from pathlib import Path
 ROOT_PATH = Path(__file__).parent
 
-def decorador_log(func): 
+
+def decorador_log(func):
     def faz_log(*args, **kwargs):
         now = datetime.datetime.now()
-        f = func(*args, **kwargs)    
+        f = func(*args, **kwargs)
         try:
-            with open(ROOT_PATH / "log.txt", "a", encoding="utf-8") as arquivo_log:
-                arquivo_log.write(f'{now.strftime("%d/%m/%Y %H:%M:%S")}, a função {func.__name__} foi executada com os argumentos: [{args}, {kwargs}], e retornou {f} \n')
+            with open(ROOT_PATH / "log.txt", "a", encoding="utf-8")\
+                    as arquivo_log:
+                arquivo_log.write(f'''{now.strftime("%d/%m/%Y %H:%M:%S")},
+                                    a função {func.__name__}
+                                    foi executada com os argumentos: [{args}, {kwargs}],
+                                    e retornou {f} \n''')
         except Exception as exc:
             print(f"Erro ao tentar registrar a ação.\nErro:{exc}")
         return f
