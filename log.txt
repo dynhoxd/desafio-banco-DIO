@@ -53,3 +53,60 @@
                                     a função depositar
                                     foi executada com os argumentos: [(1000, 300.0, {1: [{'tipo_operação': 'Depósito', 'valor': 300.0, 'data': '19/12/2025 15:10:54'}]}, 1), {}],
                                     e retornou (1300.0, {1: [{'tipo_operação': 'Depósito', 'valor': 300.0, 'data': '19/12/2025 15:10:54'}]}) 
+22/12/2025 11:49:59,
+                                    a função depositar
+                                    foi executada com os argumentos: [(1000, 300.0, {1: [{'tipo_operação': 'Depósito', 'valor': 300.0, 'data': '22/12/2025 11:49:59'}]}, 1), {}],
+                                    e retornou (1300.0, {1: [{'tipo_operação': 'Depósito', 'valor': 300.0, 'data': '22/12/2025 11:49:59'}]}) 
+22/12/2025 11:50:08,
+                                    a função exibir_extrato
+                                    foi executada com os argumentos: [(1300.0,), {'extrato': {1: [{'tipo_operação': 'Depósito', 'valor': 300.0, 'data': '22/12/2025 11:49:59'}]}, 'conta': 1, 'tipo_operacao': ''}],
+                                    e retornou None 
+22/12/2025 11:58:08,
+                                    a função listar_usuarios
+                                    foi executada com os argumentos: [([{'cpf': '123', 'nome': 'Ana Pereira', 'data_nascimento': '01-01-2000', 'endereco': 'Rua A, 123 - Centro - Rio de Janeiro/RJ', 'contas': [{'agencia': '0001', 'numero_conta': 1, 'titular': 'Ana', 'cpf': 123}]}, {'cpf': '234', 'nome': 'Bruno Cardoso', 'data_nascimento': '02-02-1990', 'endereco': 'Avenida B, 456 - Sé - São Paulo/SP', 'contas': [{'agencia': '0001', 'numero_conta': 2, 'titular': 'Bruno', 'cpf': 234}]}],), {}],
+                                    e retornou None 
+22/12/2025 11:58:20,
+                                    a função listar_contas
+                                    foi executada com os argumentos: [([{'agencia': '0001', 'numero_conta': 1, 'saldo': 1300.0, 'limite_valor_saque_dia': 500, 'saques_efetuados_hoje': 0, 'limite_saques_disponivel_dia': 10, 'titular': 'Ana', 'cpf': '123'}, {'agencia': '0001', 'numero_conta': 2, 'saldo': 300, 'limite_valor_saque_dia': 500, 'saques_efetuados_hoje': 0, 'limite_saques_disponivel_dia': 10, 'titular': 'Bruno', 'cpf': '234'}],), {}],
+                                    e retornou None 
+22/12/2025 12:09:02,
+                                    a função depositar
+                                    foi executada com os argumentos: [(1000, 213.0, {1: [{'tipo_operação': 'Depósito', 'valor': 213.0, 'data': '22/12/2025 12:09:02'}]}, 1), {}],
+                                    e retornou (1213.0, {1: [{'tipo_operação': 'Depósito', 'valor': 213.0, 'data': '22/12/2025 12:09:02'}]}) 
+22/12/2025 12:09:07,
+                                    a função sacar
+                                    foi executada com os argumentos: [(), {'saldo': 1213.0, 'valor': 45.0, 'extrato': {1: [{'tipo_operação': 'Depósito', 'valor': 213.0, 'data': '22/12/2025 12:09:02'}, {'tipo_operação': 'Saque', 'valor': 45.0, 'data': '22/12/2025 12:09:07'}]}, 'limite_diario': 500, 'saques_efetuados_hoje': 0, 'limite_saques_disponivel_dia': 10, 'conta': 1}],
+                                    e retornou (1168.0, {1: [{'tipo_operação': 'Depósito', 'valor': 213.0, 'data': '22/12/2025 12:09:02'}, {'tipo_operação': 'Saque', 'valor': 45.0, 'data': '22/12/2025 12:09:07'}]}, 1, 455.0, 9, True) 
+22/12/2025 12:09:42,
+                                    a função exibir_extrato
+                                    foi executada com os argumentos: [(1168.0,), {'extrato': {1: [{'tipo_operação': 'Depósito', 'valor': 213.0, 'data': '22/12/2025 12:09:02'}, {'tipo_operação': 'Saque', 'valor': 45.0, 'data': '22/12/2025 12:09:07'}]}, 'conta': 1, 'tipo_operacao': ''}],
+                                    e retornou None 
+22/12/2025 12:11:01,
+                                    a função depositar
+                                    foi executada com os argumentos: [(1000, 123.0, {1: [{'tipo_operação': 'Depósito', 'valor': 123.0, 'data': '22/12/2025 12:11:01'}]}, 1), {}],
+                                    e retornou (1123.0, {1: [{'tipo_operação': 'Depósito', 'valor': 123.0, 'data': '22/12/2025 12:11:01'}]}) 
+22/12/2025 12:11:47,
+                                    a função depositar
+                                    foi executada com os argumentos: [(1000, 123.0, {1: [{'tipo_operação': 'Depósito', 'valor': 123.0, 'data': '22/12/2025 12:11:47'}]}, 1), {}],
+                                    e retornou (1123.0, {1: [{'tipo_operação': 'Depósito', 'valor': 123.0, 'data': '22/12/2025 12:11:47'}]}) 
+22/12/2025 12:13:04,
+                                    a função depositar
+                                    foi executada com os argumentos: [(1000, 2134.0, {1: [{'tipo_operação': 'Depósito', 'valor': 2134.0, 'data': '22/12/2025 12:13:04'}]}, 1), {}],
+                                    e retornou (3134.0, {1: [{'tipo_operação': 'Depósito', 'valor': 2134.0, 'data': '22/12/2025 12:13:04'}]}) 
+22/12/2025 12:13:50,
+                                    a função depositar
+                                    foi executada com os argumentos: [(1000, 2134.0, {1: [{'tipo_operação': 'Depósito', 'valor': 2134.0, 'data': '22/12/2025 12:13:50'}]}, 1), {}],
+                                    e retornou (3134.0, {1: [{'tipo_operação': 'Depósito', 'valor': 2134.0, 'data': '22/12/2025 12:13:50'}]}) 
+22/12/2025 12:14:10,
+                                    a função exibir_extrato
+                                    foi executada com os argumentos: [(3134.0,), {'extrato': {1: [{'tipo_operação': 'Depósito', 'valor': 2134.0, 'data': '22/12/2025 12:13:50'}]}, 'conta': 1, 'tipo_operacao': ''}],
+                                    e retornou None 
+22/12/2025 12:14:33,
+                                    a função depositar
+                                    foi executada com os argumentos: [(1000, 123.0, {1: [{'tipo_operação': 'Depósito', 'valor': 123.0, 'data': '22/12/2025 12:14:33'}]}, 1), {}],
+                                    e retornou (1123.0, {1: [{'tipo_operação': 'Depósito', 'valor': 123.0, 'data': '22/12/2025 12:14:33'}]}) 
+22/12/2025 12:31:24,a função {func.__name__}foi executada com os argumentos: [{args}, {kwargs}],e retornou {f} 
+22/12/2025 12:32:16, a função listar_usuarios foi executada com os argumentos: [([{'cpf': '123', 'nome': 'Ana Pereira', 'data_nascimento': '01-01-2000', 'endereco': 'Rua A, 123 - Centro - Rio de Janeiro/RJ', 'contas': [{'agencia': '0001', 'numero_conta': 1, 'titular': 'Ana', 'cpf': 123}]}, {'cpf': '234', 'nome': 'Bruno Cardoso', 'data_nascimento': '02-02-1990', 'endereco': 'Avenida B, 456 - Sé - São Paulo/SP', 'contas': [{'agencia': '0001', 'numero_conta': 2, 'titular': 'Bruno', 'cpf': 234}]}],), {}], e retornou None 
+22/04/2026 18:22:22, a função listar_contas foi executada com os argumentos: [([{'agencia': '0001', 'numero_conta': 1, 'saldo': 1000, 'limite_valor_saque_dia': 500, 'saques_efetuados_hoje': 0, 'limite_saques_disponivel_dia': 10, 'titular': 'Ana', 'cpf': '123'}, {'agencia': '0001', 'numero_conta': 2, 'saldo': 300, 'limite_valor_saque_dia': 500, 'saques_efetuados_hoje': 0, 'limite_saques_disponivel_dia': 10, 'titular': 'Bruno', 'cpf': '234'}],), {}], e retornou None 
+22/04/2026 18:36:19, a função listar_contas foi executada com os argumentos: [([{'agencia': '0001', 'numero_conta': 1, 'saldo': 1000, 'limite_valor_saque_dia': 500, 'saques_efetuados_hoje': 0, 'limite_saques_disponivel_dia': 10, 'titular': 'Ana', 'cpf': '123'}, {'agencia': '0001', 'numero_conta': 2, 'saldo': 300, 'limite_valor_saque_dia': 500, 'saques_efetuados_hoje': 0, 'limite_saques_disponivel_dia': 10, 'titular': 'Bruno', 'cpf': '234'}],), {}], e retornou None 
+22/04/2026 18:47:12, a função listar_contas foi executada com os argumentos: [([{'agencia': '0001', 'numero_conta': 1, 'saldo': 1000, 'limite_valor_saque_dia': 500, 'saques_efetuados_hoje': 0, 'limite_saques_disponivel_dia': 10, 'titular': 'Ana', 'cpf': '123'}, {'agencia': '0001', 'numero_conta': 2, 'saldo': 300, 'limite_valor_saque_dia': 500, 'saques_efetuados_hoje': 0, 'limite_saques_disponivel_dia': 10, 'titular': 'Bruno', 'cpf': '234'}],), {}], e retornou None 

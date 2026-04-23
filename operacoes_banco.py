@@ -12,10 +12,10 @@ def decorador_log(func):
         try:
             with open(ROOT_PATH / "log.txt", "a", encoding="utf-8") as arquivo_log:
                 arquivo_log.write(
-                    f"""{now.strftime("%d/%m/%Y %H:%M:%S")},
-                                    a função {func.__name__}
-                                    foi executada com os argumentos: [{args}, {kwargs}],
-                                    e retornou {f} \n"""
+                    f"{now.strftime("%d/%m/%Y %H:%M:%S")}, "
+                                    f"a função {func.__name__} "
+                                    f"foi executada com os argumentos: [{args}, {kwargs}], "
+                                    f"e retornou {f} \n"
                 )
         except Exception as exc:
             print(f"Erro ao tentar registrar a ação.\nErro:{exc}")
@@ -169,25 +169,53 @@ def registrar_conta(numero_agencia, numero_conta, usuario, contas, cpf):
     )
 
 
+class ContaIterator:
+    def __init__(self, contas):
+        self.contas = contas
+        self.contador = 0
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        try:
+            conta = self.contas[self.contador]
+            self.contador += 1
+            return conta
+        except IndexError:
+            raise StopIteration
+
+
 @decorador_log
 def listar_contas(contas):
-    iterador = iter(contas)
-    while True:
-        try:
-            conta = next(iterador)
-            print(
-                textwrap.dedent(
-                    f"""\n
-                Conta: {conta["numero_conta"]}\n
-                Agência: {conta["agencia"]}\n
-                Saldo: R$ {conta["saldo"]:.2f}\n
-                Limite disponível para saque hoje: R$ {conta["limite_valor_saque_dia"]:.2f}\n
-                Titular: {conta["titular"]}\n
-                CPF: {conta["cpf"]}\n\n\n"""
-                )
+    for conta in ContaIterator(contas):
+        print(
+            textwrap.dedent(
+                f"""\n
+            Conta: {conta["numero_conta"]}\n
+            Agência: {conta["agencia"]}\n
+            Saldo: R$ {conta["saldo"]:.2f}\n
+            Limite disponível para saque hoje: R$ {conta["limite_valor_saque_dia"]:.2f}\n
+            Titular: {conta["titular"]}\n
+            CPF: {conta["cpf"]}\n\n\n"""
             )
-        except StopIteration:
-            break
+        )   
+
+    # ou podemos usar o iterador nativo do Python para iterar sobre a lista de contas, já que as listas são iteráveis por padrão:
+
+    # iterador = iter(contas)
+    # for conta in iterador:
+    #     print(
+    #             textwrap.dedent(
+    #                 f"""\n
+    #             Conta: {conta["numero_conta"]}\n
+    #             Agência: {conta["agencia"]}\n
+    #             Saldo: R$ {conta["saldo"]:.2f}\n
+    #             Limite disponível para saque hoje: R$ {conta["limite_valor_saque_dia"]:.2f}\n
+    #             Titular: {conta["titular"]}\n
+    #             CPF: {conta["cpf"]}\n\n\n"""
+    #             )
+    #         )
 
 
 @decorador_log
