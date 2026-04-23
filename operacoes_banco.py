@@ -221,10 +221,8 @@ def listar_contas(contas):
 @decorador_log
 def listar_usuarios(usuarios):
     user_interator = iter(usuarios)
-    while True:
-        try:
-            usuario = next(user_interator)
-            print(
+    for usuario in user_interator:
+        print(
                 textwrap.dedent(
                     f"""\n
                 Nome: {usuario["nome"]}\n
@@ -235,18 +233,16 @@ def listar_usuarios(usuarios):
                 """
                 )
             )
-            contas = usuario.get("contas", [])
-            for conta in contas:
-                print(
-                    textwrap.dedent(
-                        f"""
-                    N° da conta: {conta["numero_conta"]}\n
-                    Agência: {conta["agencia"]}\n\n"""
-                    )
+        contas = usuario.get("contas", [])
+        for conta in contas:
+            print(
+                textwrap.dedent(
+                    f"""
+                N° da conta: {conta["numero_conta"]}\n
+                Agência: {conta["agencia"]}\n\n"""
                 )
-            print("\n----------------------------------------\n")
-        except StopIteration:
-            break
+            )
+        print("\n----------------------------------------\n")
 
 
 def main():
@@ -281,7 +277,7 @@ def main():
             "limite_valor_saque_dia": 500,
             "saques_efetuados_hoje": 0,
             "limite_saques_disponivel_dia": 10,
-            "titular": "Ana",
+            "titular": "Ana Pereira",
             "cpf": "123",
         },
         {
@@ -291,7 +287,7 @@ def main():
             "limite_valor_saque_dia": 500,
             "saques_efetuados_hoje": 0,
             "limite_saques_disponivel_dia": 10,
-            "titular": "Bruno",
+            "titular": "Bruno Cardoso",
             "cpf": "234",
         },
     ]
