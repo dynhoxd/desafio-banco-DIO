@@ -12,10 +12,10 @@ def decorador_log(func):
         try:
             with open(ROOT_PATH / "log.txt", "a", encoding="utf-8") as arquivo_log:
                 arquivo_log.write(
-                    f"{now.strftime("%d/%m/%Y %H:%M:%S")}, "
-                                    f"a função {func.__name__} "
-                                    f"foi executada com os argumentos: [{args}, {kwargs}], "
-                                    f"e retornou {f} \n"
+                    f"{now.strftime('%d/%m/%Y %H:%M:%S')}, "
+                    f"a função {func.__name__} "
+                    f"foi executada com os argumentos: [{args}, {kwargs}], "
+                    f"e retornou {f} \n"
                 )
         except Exception as exc:
             print(f"Erro ao tentar registrar a ação.\nErro:{exc}")
@@ -165,7 +165,8 @@ def registrar_conta(numero_agencia, numero_conta, usuario, contas, cpf):
     contas.append(conta)
     usuario["contas"].append(conta)
     print(
-        f"\nA conta n° {numero_conta} da agência {numero_agencia} foi criada para o(a) cliente {usuario["nome"]}."
+        f"\nA conta n° {numero_conta} da agência {numero_agencia}"
+        f" foi criada para o(a) cliente {usuario['nome']}."
     )
 
 
@@ -173,10 +174,10 @@ class ContaIterator:
     def __init__(self, contas):
         self.contas = contas
         self.contador = 0
-    
+
     def __iter__(self):
         return self
-    
+
     def __next__(self):
         try:
             conta = self.contas[self.contador]
@@ -199,23 +200,14 @@ def listar_contas(contas):
             Titular: {conta["titular"]}\n
             CPF: {conta["cpf"]}\n\n\n"""
             )
-        )   
+        )
 
-    # ou podemos usar o iterador nativo do Python para iterar sobre a lista de contas, já que as listas são iteráveis por padrão:
+    # ou podemos usar o iterador nativo do Python para iterar
+    # sobre a lista de contas, já que as listas são iteráveis por padrão:
 
     # iterador = iter(contas)
     # for conta in iterador:
-    #     print(
-    #             textwrap.dedent(
-    #                 f"""\n
-    #             Conta: {conta["numero_conta"]}\n
-    #             Agência: {conta["agencia"]}\n
-    #             Saldo: R$ {conta["saldo"]:.2f}\n
-    #             Limite disponível para saque hoje: R$ {conta["limite_valor_saque_dia"]:.2f}\n
-    #             Titular: {conta["titular"]}\n
-    #             CPF: {conta["cpf"]}\n\n\n"""
-    #             )
-    #         )
+    # e o print
 
 
 @decorador_log
@@ -223,16 +215,16 @@ def listar_usuarios(usuarios):
     user_interator = iter(usuarios)
     for usuario in user_interator:
         print(
-                textwrap.dedent(
-                    f"""\n
+            textwrap.dedent(
+                f"""\n
                 Nome: {usuario["nome"]}\n
                 cpf: {usuario["cpf"]}\n
                 Data de Nascimento: {usuario["data_nascimento"]}\n
                 Endereço: {usuario["endereco"]}\n
                 Contas:
                 """
-                )
             )
+        )
         contas = usuario.get("contas", [])
         for conta in contas:
             print(
