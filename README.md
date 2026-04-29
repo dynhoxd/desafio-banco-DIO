@@ -11,6 +11,10 @@ Usei tudo o que aprendi até o momento e fiz consultas com IA e na internet para
 
 ## Atualizações
 
+29/04/2026 - criei os arquivos clientes e contas.jsonl para tornar o programa persistente. Implementei o uso do pacote json para converter as informações. Usei a tática de criar um arquivo temporário para escrita dos dados,
+sem perder os dados já escritos nos citados arquivos. Juntei as funções Sacar e depositar, alterando também os seus métodos de chamamento. Igualmente, alterei os métodos e funções para listar usuários e contas, devido a
+implementação dos arquivos de registros.
+
 No decorrer do curso, foi feito o desafio de atualizar esse programa com a implementação de iteradores, decoradores e geradores, cada um deles nos pontos específicos 
 em que este código está formatado.
 
