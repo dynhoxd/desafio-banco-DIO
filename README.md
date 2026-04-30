@@ -15,7 +15,7 @@ Usei tudo o que aprendi até o momento e fiz consultas com IA e na internet para
 sem perder os dados já escritos nos citados arquivos. Juntei as funções Sacar e depositar, alterando também os seus métodos de chamamento. Igualmente, alterei os métodos e funções para listar usuários e contas, devido a
 implementação dos arquivos de registros.
 
-No decorrer do curso, foi feito o desafio de atualizar esse programa com a implementação de iteradores, decoradores e geradores, cada um deles nos pontos específicos 
+19/11/2025 - No decorrer do curso, foi feito o desafio de atualizar esse programa com a implementação de iteradores, decoradores e geradores, cada um deles nos pontos específicos 
 em que este código está formatado.
 
 
