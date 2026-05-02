@@ -1,42 +1,11 @@
-28/04/2026 22:49:33, a função listar_contas foi executada com os argumentos: [([{'agencia': '0001', 'numero_conta': 1, 'saldo': 1000, 'limite_valor_saque_dia': 500, 'saques_efetuados_hoje': 0, 'limite_saques_disponivel_dia': 10, 'titular': 'Ana Pereira', 'cpf': '123'}, {'agencia': '0001', 'numero_conta': 2, 'saldo': 300, 'limite_valor_saque_dia': 500, 'saques_efetuados_hoje': 0, 'limite_saques_disponivel_dia': 10, 'titular': 'Bruno Cardoso', 'cpf': '234'}],), {}], e retornou None 
-28/04/2026 22:56:02, a função listar_contas foi executada com os argumentos: [(), {}], e retornou None 
-28/04/2026 22:57:37, a função listar_contas foi executada com os argumentos: [(), {}], e retornou None 
-28/04/2026 23:01:34, a função listar_usuarios foi executada com os argumentos: [(), {}], e retornou None 
-29/04/2026 00:53:48, a função sacar foi executada com os argumentos: [(1, '300'), {}], e retornou None 
-29/04/2026 00:54:03, a função sacar foi executada com os argumentos: [(2, '100'), {}], e retornou None 
-29/04/2026 00:59:33, a função sacar_e_depositar foi executada com os argumentos: [(1, '200'), {'metodo': 'sacar'}], e retornou None 
-29/04/2026 01:00:32, a função sacar_e_depositar foi executada com os argumentos: [(1, '200'), {'metodo': 'depositar'}], e retornou None 
-29/04/2026 01:00:40, a função sacar_e_depositar foi executada com os argumentos: [(2, '300'), {'metodo': 'depositar'}], e retornou None 
-29/04/2026 01:16:21, a função registrar_usuario foi executada com os argumentos: [('Iza Munique', '01/02/2000', '987', 'Rua Hispano, 99 - Cedofeita - Porto/P'), {}], e retornou None 
-29/04/2026 01:23:42, a função registrar_usuario foi executada com os argumentos: [('Iza Munique', '01/02/2000', '987', 'Rua Hispano, 99 - Cedofeita - Porto/P'), {}], e retornou None 
-01/05/2026 04:33:40, a função registrar_conta foi executada com os argumentos: [({'cpf': '123', 'nome': 'Ana Pereira', 'data_nascimento': '01-01-2000', 'endereco': 'Rua A, 123 - Centro - Rio de Janeiro/RJ', 'contas': [{'agencia': '0001', 'numero_conta': 1, 'titular': 'Ana', 'cpf': 123}]}, '123'), {}], e retornou None 
-01/05/2026 04:34:54, a função registrar_conta foi executada com os argumentos: [({'cpf': '123', 'nome': 'Ana Pereira', 'data_nascimento': '01-01-2000', 'endereco': 'Rua A, 123 - Centro - Rio de Janeiro/RJ', 'contas': [{'agencia': '0001', 'numero_conta': 1, 'titular': 'Ana', 'cpf': 123}]}, '123'), {}], e retornou None 
-01/05/2026 04:59:21, a função registrar_conta foi executada com os argumentos: [('Ana Pereira', '123'), {}], e retornou None 
-01/05/2026 05:00:09, a função registrar_conta foi executada com os argumentos: [('Ana Pereira', '123'), {}], e retornou None 
-01/05/2026 05:01:50, a função registrar_conta foi executada com os argumentos: [('Ana Pereira', '123'), {}], e retornou None 
-01/05/2026 05:05:04, a função registrar_conta foi executada com os argumentos: [('Ana Pereira', '123'), {}], e retornou None 
-01/05/2026 05:25:36, a função registrar_conta foi executada com os argumentos: [('Ana Pereira', '123'), {}], e retornou None 
-01/05/2026 05:30:11, a função registrar_conta foi executada com os argumentos: [('Ana Pereira', '123'), {}], e retornou None 
-01/05/2026 05:47:33, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 05:52:57, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 05:55:35, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 05:56:07, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 05:57:43, a função listar_usuarios foi executada com os argumentos: [(), {}], e retornou None 
-01/05/2026 05:57:58, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:11:30, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:14:00, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:15:35, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:17:28, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:18:17, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:19:52, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:21:14, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:26:31, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:36:18, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:38:24, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:43:52, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:45:36, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:47:23, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:48:29, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 06:53:19, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 07:00:09, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
-01/05/2026 07:07:42, a função registrar_conta foi executada com os argumentos: [('Iza Munique', '987'), {}], e retornou None 
+02/05/2026 04:33:21, cliente de cpf 987, fez a ação de sacar_ou_depositar com os argumentos: [(3,), {'valor': 200.0, 'metodo': 'depositar'}], e retornou ('Depósito', 200.0) 
+02/05/2026 04:49:23, cliente de cpf 987, fez a ação de sacar_ou_depositar com os argumentos: [(3,), {'valor': 50.0, 'metodo': 'depositar'}], e retornou ('Depósito', 50.0) 
+02/05/2026 04:55:35, cliente de cpf 123, fez a ação de sacar_ou_depositar com os argumentos: [(1,), {'valor': 200.0, 'metodo': 'depositar'}], e retornou ('Depósito', 200.0) 
+02/05/2026 04:57:46, cliente de cpf 123, fez a ação de sacar_ou_depositar com os argumentos: [(1,), {'valor': 300.0, 'metodo': 'sacar'}], e retornou ('Saque', 300.0) 
+02/05/2026 05:07:17, cliente de cpf 123, fez a ação de sacar_ou_depositar com os argumentos: [(1,), {'valor': 300.0, 'metodo': 'sacar'}], e retornou ('Saque', 300.0) 
+02/05/2026 05:11:18, cliente de cpf 123, fez a ação de sacar_ou_depositar com os argumentos: [(1,), {'valor': 300.0, 'metodo': 'sacar'}], e retornou ('Saque', 300.0) 
+02/05/2026 05:17:21, cliente de cpf 123, fez a ação de sacar_ou_depositar com os argumentos: [(1,), {'valor': 50.0, 'metodo': 'sacar'}], e retornou ('Saque', 50.0) 
+02/05/2026 05:17:47, cliente de cpf 987, fez a ação de registrar_conta com os argumentos: [('Iza Munique',), {}], e retornou ('0001', 4, '987')
+02/05/2026 05:53:40, Foi executada a ação de listar_contas
+02/05/2026 05:53:45, Foi executada a ação de listar_usuarios
+02/05/2026 05:56:36, cliente de cpf 987, fez a ação de sacar_ou_depositar com os argumentos: [(4,), {'valor': 200.0, 'metodo': 'deposito'}], e retornou None 

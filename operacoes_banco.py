@@ -29,17 +29,28 @@ def decorador_log(func):
     def faz_log(*args, **kwargs):
         now = datetime.datetime.now()
         f = func(*args, **kwargs)
+        cpf = kwargs.get("cpf")
+        args_nomeados = kwargs.copy()
+        if "cpf" in args_nomeados:
+            del args_nomeados["cpf"]
         try:
             with open(ROOT_PATH / "log.txt", "a", encoding="utf-8") as arquivo_log:
-                arquivo_log.write(
-                    f"{now.strftime('%d/%m/%Y %H:%M:%S')}, "
-                    f"a função {func.__name__} "
-                    f"foi executada com os argumentos: [{args}, {kwargs}], "
-                    f"e retornou {f} \n"
-                )
+                if cpf:
+                    arquivo_log.write(
+                        f"{now.strftime('%d/%m/%Y %H:%M:%S')}, "
+                        f"cliente de cpf {cpf}, "
+                        f"fez a ação de {func.__name__} "
+                        f"com os argumentos: [{args}, {args_nomeados}], "
+                        f"e retornou {f} \n"
+                    )
+                else:
+                    arquivo_log.write(
+                        f"{now.strftime('%d/%m/%Y %H:%M:%S')}, "
+                        f"Foi executada a ação de {func.__name__}\n"
+                    )
         except Exception as exc:
             print(f"Erro ao tentar registrar a ação.\nErro:{exc}")
-        return f
+        return func.__name__
 
     return faz_log
 
@@ -62,21 +73,29 @@ def menu():
 
 
 @decorador_log
-def sacar_e_depositar(conta_informada, valor_str, *, metodo):
+def sacar_ou_depositar(conta_informada, valor, *, metodo, cpf):
     try:
         with (
             open(ROOT_PATH / "contas.jsonl", "r", encoding="utf-8") as leitura_contas,
-            open(
-                ROOT_PATH / "contas_temp.jsonl", "w", encoding="utf-8"
+            open(ROOT_PATH / "contas_temp.jsonl", "w", encoding="utf-8"
             ) as escrita_contas,
         ):
             for linha in leitura_contas:
                 conta = json.loads(linha)
-                if conta_informada == conta["numero_conta"]:
-                    if metodo == "sacar":
-                        conta["saldo"] -= float(valor_str)
-                    elif metodo == "depositar":
-                        conta["saldo"] += float(valor_str)
+                if conta_informada == conta.get("numero_conta"):
+                    if metodo == "saque":
+                        if valor > conta["saldo"]:
+                            print("Saldo insuficiente")
+                        elif valor > conta["limite_valor_saque_dia"]:
+                            print("Limite de valor diário excedido")
+                        elif conta["saques_efetuados_hoje"] == 10:
+                            print("Limite de saques diários excedido")
+                        else:
+                            conta["saldo"] -= valor
+                            conta["saques_efetuados_hoje"] += 1
+                            conta["limite_valor_saque_dia"] -= valor
+                    elif metodo == "deposito":
+                        conta["saldo"] += valor
                 escrita_contas.write(json.dumps(conta) + "\n")
         os.replace(ROOT_PATH / "contas_temp.jsonl", ROOT_PATH / "contas.jsonl")
         print("Operação realizada com sucesso.")
@@ -88,10 +107,17 @@ def sacar_e_depositar(conta_informada, valor_str, *, metodo):
         print(f"Arquivo não encontrado. {exc}")
     except Exception as exc:
         print(f"Erro ao realizar a operação. {exc}")
+    finally:
+        if arquivo_temp := os.path.exists(ROOT_PATH / "contas_temp.jsonl"):
+            os.remove(arquivo_temp)
+    if metodo == "sacar":
+        return "Saque", valor
+    elif metodo == "depositar":
+        return "Depósito", valor
 
 
 @decorador_log
-def exibir_extrato(saldo, /, *, extrato, conta, tipo_operacao):
+def exibir_extrato(saldo, /, *, extrato, conta, tipo_operacao, cpf):
 
     def filtro_operacoes():
         for operacoes in extrato[conta]:
@@ -140,6 +166,7 @@ def registrar_usuario(nome, data_nascimento, cpf, endereco):
         print(f"Arquivo não encontrado. {exc}")
     except Exception as exc:
         print(f"Erro ao realizar a operação. {exc}")
+    return usuario["nome"], usuario["cpf"]
 
 
 @decorador_log
@@ -164,8 +191,7 @@ def registrar_conta(nome, cpf):
                 "saldo": 0,
                 "limite_valor_saque_dia": 500,
                 "saques_efetuados_hoje": 0,
-                "limite_saques_disponiveis_dia": 10,
-                "Titular": nome,
+                "titular": nome,
                 "cpf": cpf,
             }
             contas_escrita.write(json.dumps(nova_conta) + "\n")
@@ -174,16 +200,13 @@ def registrar_conta(nome, cpf):
             )
         os.replace(ROOT_PATH / "contas_temp.jsonl", ROOT_PATH / "contas.jsonl")
 
-        with (
-            open(ROOT_PATH / "clientes.jsonl", "r", encoding="utf-8") as clientes_leitura,
-            open(ROOT_PATH / "clientes_temp.jsonl", "w", encoding="utf-8") as clientes_escrita
-        ):
+        with open(ROOT_PATH / "clientes.jsonl", "r", encoding="utf-8") as clientes_leitura, open(ROOT_PATH / "clientes_temp.jsonl", "w", encoding="utf-8") as clientes_escrita:
             for linha in clientes_leitura:
                 cliente = json.loads(linha)
                 if cliente["cpf"] == cpf:
                     cliente["contas"].append({"agencia": nova_conta["agencia"], "numero_conta": nova_conta["numero_conta"]})
                 clientes_escrita.write(json.dumps(cliente) + "\n")
-        os.replace("C:\\Users\\jande\\Documents\\python\\desafio-banco\\clientes_temp.jsonl", "C:\\Users\\jande\\Documents\\python\\desafio-banco\\clientes.jsonl")
+        os.replace(ROOT_PATH / "clientes_temp.jsonl", ROOT_PATH / "clientes.jsonl")
             
     except IOError as exc:
         print(f"Erro ao realizar a operação. {exc}")
@@ -197,23 +220,7 @@ def registrar_conta(nome, cpf):
         print(f"Permissão negada ao acessar o arquivo. {exc}")
     except Exception as exc:
         print(f"Erro ao realizar a operação. {exc}")
-
-    # conta = {
-    #     "agencia": numero_agencia,
-    #     "numero_conta": numero_conta,
-    #     "saldo": 0,
-    #     "limite_valor_saque_dia": 500,
-    #     "saques_efetuados_hoje": 0,
-    #     "limite_saques_disponivel_dia": 10,
-    #     "titular": usuario["nome"],
-    #     "cpf": cpf,
-    # }
-    # contas.append(conta)
-    # usuario["contas"].append(conta)
-    # print(
-    #     f"\nA conta n° {numero_conta} da agência {numero_agencia}"
-    #     f" foi criada para o(a) cliente {usuario['nome']}."
-    # )
+    return nova_conta["agencia"], nova_conta["numero_conta"], nova_conta["cpf"]
 
 
 @decorador_log
@@ -221,6 +228,7 @@ def listar_contas():
     # for contas in ContaIterator(contas):
     try:
         with open(ROOT_PATH / "contas.jsonl", "r", encoding="utf-8") as arquivo_contas:
+            next(arquivo_contas)
             for linha in arquivo_contas:
                 conta = json.loads(linha)
                 print(
@@ -298,30 +306,47 @@ def main():
         opcao = menu().lower()
         if opcao == "d":
             conta_informada = int(input("Informe o número da conta para depósito: "))
-            with open(
-                ROOT_PATH / "contas.jsonl", "r", encoding="utf-8"
-            ) as arquivo_contas:
-                conta = [json.loads(linha) for linha in arquivo_contas]
-                if conta_informada not in [c["numero_conta"] for c in conta]:
-                    print("Conta não encontrada.")
-                    continue
-            valor_str = input("Informe o valor do depósito ou digite x para voltar: ")
-            if valor_str.lower() == "x":
-                continue
-            sacar_e_depositar(conta_informada, valor_str, metodo="depositar")
+            conta_encontrada = False
+            arquivo_contas = open(ROOT_PATH / "contas.jsonl", "r", encoding="utf-8")
+            for linha in arquivo_contas:
+                conta = json.loads(linha)
+                if conta_informada == conta.get("numero_conta"):
+                    valor_str = input("Informe o valor do depósito ou digite x para voltar: ")
+                    conta_encontrada = True
+                    if valor_str.lower() == "x":
+                        break
+                    cpf = conta["cpf"]
+                    arquivo_contas.close()
+                    sacar_ou_depositar(
+                        conta_informada, valor = float(valor_str), metodo="deposito", cpf = cpf
+                        )
+                    break
+            if not conta_encontrada:
+                print("\nConta não encontrada")
+
+
+
         elif opcao == "s":
             conta_informada = int(input("Informe o número da conta para saque: "))
-            with open(
-                ROOT_PATH / "contas.jsonl", "r", encoding="utf-8"
-            ) as arquivo_contas:
-                conta = [json.loads(linha) for linha in arquivo_contas]
-                if conta_informada not in [c["numero_conta"] for c in conta]:
-                    print("Conta não encontrada.")
-                    continue
-            valor_str = input("Informe o valor do saque ou digite x para voltar: ")
-            if valor_str.lower() == "x":
-                continue
-            sacar_e_depositar(conta_informada, valor_str, metodo="sacar")
+            conta_encontrada = False
+            arquivo_contas = open(ROOT_PATH / "contas.jsonl", "r", encoding="utf-8")
+            for linha in arquivo_contas:
+                conta = json.loads(linha)
+                if conta_informada == conta.get("numero_conta"):
+                    valor_str = input("Informe o valor para sacar ou digite x para voltar: ")
+                    if valor_str.lower() == "x":
+                        continue
+                    conta_encontrada = True
+                    cpf = conta["cpf"]
+                    arquivo_contas.close()
+                    sacar_ou_depositar(
+                        conta_informada, valor = float(valor_str), metodo="saque", cpf = cpf
+                        )
+                    break
+            if not conta_encontrada:
+                print("\nConta não encontrada")
+
+
         elif opcao == "e":
             conta = int(input("Informe o número da conta para exibir o extrato: "))
             if conta not in [c["numero_conta"] for c in contas]:
@@ -360,7 +385,7 @@ def main():
                 endereco = input(
                     "Informe o endereço do novo cliente (logradouro, número - bairro - cidade/sigla estado): "
                 )
-                registrar_usuario(nome, data_nascimento, cpf, endereco)
+                registrar_usuario(nome, data_nascimento, cpf = cpf, endereco = endereco)
             except IOError as exc:
                 print(f"Erro ao realizar a operação. {exc}")
             except IsADirectoryError as exc:
@@ -372,22 +397,21 @@ def main():
         elif opcao == "rc":
             try:
                 cpf = input("Informe o CPF do cliente: ")
-                with open(
-                    ROOT_PATH / "clientes.jsonl", "r", encoding="utf-8"
-                ) as arquivo_usuarios:
-                    encontrado = False
-                    for linha in arquivo_usuarios:
-                        usuario = json.loads(linha)
-                        if usuario.get("cpf") == cpf:
-                            nome = usuario["nome"]
-                            registrar_conta(nome, cpf)
-                            encontrado = True
-                            break
-                    if not encontrado:
-                        print(
-                            """Usuário não encontrado.
-                            Por favor, registre o usuário antes de criar uma conta!"""
-                        )
+                arquivo_usuarios = open(ROOT_PATH / "clientes.jsonl", "r", encoding="utf-8")
+                encontrado = False
+                for linha in arquivo_usuarios:
+                    usuario = json.loads(linha)
+                    if usuario.get("cpf") == cpf:
+                        nome = usuario["nome"]
+                        arquivo_usuarios.close()
+                        registrar_conta(nome, cpf = cpf)
+                        encontrado = True
+                        break
+                if not encontrado:
+                    print(
+                        """Usuário não encontrado.
+                        Por favor, registre o usuário antes de criar uma conta!"""
+                    )
             except IOError as exc:
                 print(f"Erro ao realizar a operação. {exc}")
             except IsADirectoryError as exc:
