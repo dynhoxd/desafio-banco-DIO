@@ -4,7 +4,7 @@
   },
   "1": {
     "agencia": "0001",
-    "saldo": 0,
+    "saldo": 600.0,
     "limite_valor_saque_dia": 500,
     "saques_efetuados_hoje": 0,
     "titular": "ana",
@@ -12,7 +12,7 @@
   },
   "2": {
     "agencia": "0001",
-    "saldo": 0,
+    "saldo": 700.0,
     "limite_valor_saque_dia": 500,
     "saques_efetuados_hoje": 0,
     "titular": "ana",
@@ -20,9 +20,9 @@
   },
   "3": {
     "agencia": "0001",
-    "saldo": 0,
-    "limite_valor_saque_dia": 500,
-    "saques_efetuados_hoje": 0,
+    "saldo": 1000.0,
+    "limite_valor_saque_dia": 300.0,
+    "saques_efetuados_hoje": 1,
     "titular": "raul",
     "cpf": "321"
   },

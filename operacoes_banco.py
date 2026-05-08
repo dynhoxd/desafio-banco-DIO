@@ -29,7 +29,8 @@ def decorador_log(func):
     def faz_log(*args, **kwargs):
         now = datetime.datetime.now()
         f = func(*args, **kwargs)
-        cpf = kwargs.get("cpf")
+        cpf = args[0].cpf
+        # cpf = kwargs.get("cpf")
         args_nomeados = kwargs.copy()
         if "cpf" in args_nomeados:
             del args_nomeados["cpf"]
@@ -40,8 +41,7 @@ def decorador_log(func):
                         f"{now.strftime('%d/%m/%Y %H:%M:%S')}, "
                         f"cliente de cpf {cpf}, "
                         f"fez a ação de {func.__name__} "
-                        f"com os argumentos: [{args}, {args_nomeados}], "
-                        f"e retornou {f} \n"
+                        f"com os argumentos: [{args}, {args_nomeados}]\n"
                     )
                 else:
                     arquivo_log.write(
@@ -88,10 +88,36 @@ except:
 class Transacoes:
     def __init__(self, contas):
         self.contas = contas
-    def depositar(self):
-        pass
-    def sacar(self):
-        pass
+
+    @decorador_log
+    def depositar(self, conta, valor):
+        self.cpf = self.contas[conta]["cpf"]
+        self.contas[conta]["saldo"] += valor
+        self.salvar_atualizacoes()
+        print(f"\nO depósito de €{valor} na conta {conta} foi feito com sucesso")
+        
+    @decorador_log
+    def sacar(self, conta, valor):
+        self.cpf = self.contas[conta]["cpf"]
+        if valor > self.contas[conta]["saldo"]:
+            print("\nSaldo insuficiente")
+        elif valor > self.contas[conta]["limite_valor_saque_dia"]:
+            print("\nLimite de valor diário excedido")
+        elif self.contas[conta]["saques_efetuados_hoje"] == 10:
+            print("\nLimite de saques diários excedido")
+        else:
+            self.contas[conta]["saldo"] -= valor
+            self.contas[conta]["saques_efetuados_hoje"] += 1
+            self.contas[conta]["limite_valor_saque_dia"] -= valor
+            self.salvar_atualizacoes()
+            print(f"\nO saque de €{valor} da conta {conta} foi feito com sucesso")
+
+    def salvar_atualizacoes(self):
+        try:
+            with open (ROOT_PATH / "contas.json", "w", encoding="utf-8") as arquivo_contas:
+                json.dump(self.contas, arquivo_contas, indent=2)
+        except IOError as exc:
+            print(f"\nErro ao tentar salvar as atualizações no arquivo de contas: {exc}")
 
 class Banco:
     def __init__(self, clientes, contas):
@@ -99,8 +125,10 @@ class Banco:
         self.contas = contas
         self.agencia = "0001"
 
+    @decorador_log
     def registrar_usuario(self, novo_cliente):
-        self.clientes[novo_cliente["cpf"]] = {
+        self.cpf = self.contas[novo_cliente["cpf"]]
+        self.clientes[self.cpf] = {
             "nome":novo_cliente["nome"],
             "data_nascimento":novo_cliente["data_nascimento"],
             "endereco":novo_cliente["endereco"],
@@ -109,24 +137,27 @@ class Banco:
         self.salvar_atualizacoes()
         print("\nUsuário registrado com sucesso")
 
+    @decorador_log
     def registrar_conta(self, nova_conta):
+        self.cpf = self.contas[nova_conta["cpf"]]
         self.contas[nova_conta["numero_conta"]] = {
             "agencia": self.agencia,
             "saldo": 0,
             "limite_valor_saque_dia": 500,
             "saques_efetuados_hoje": 0,
             "titular": nova_conta["titular"],
-            "cpf": nova_conta["cpf"],
+            "cpf": self.cpf
             }
         numero_total_contas = nova_conta["numero_conta"]
         self.contas["0"]["numero_total_contas"] = str(numero_total_contas)
-        self.clientes[nova_conta["cpf"]]["contas"].append({
+        self.clientes[self.cpf]["contas"].append({
             "agencia": self.agencia,
             "numero_conta": nova_conta["numero_conta"]
         })
         self.salvar_atualizacoes()
         print("\nConta registrada com sucesso")
-        
+    
+    @decorador_log
     def listar_contas(self):
         for numero_conta, conta in self.contas.items():
             if numero_conta != "0":
@@ -140,9 +171,10 @@ class Banco:
                 """)
         )
 
+    @decorador_log
     def listar_usuarios(self):
         for cpf, usuario in self.clientes.items():
-            print(textwrap.dedent(f"""
+            print(textwrap.dedent(f"""\n
                 nome: {usuario['nome']}
                 cpf: {cpf}
                 data de nascimento: {usuario['data_nascimento']}
@@ -156,21 +188,23 @@ class Banco:
                 """)
             print("\n----------------------------------------\n")
 
+    @decorador_log
     def exibir_saldo(self, conta_informada):
-        print(f"O saldo da conta {conta_informada} é R$ {self.contas[conta_informada]['saldo']:.2f}")
+        self.cpf = self.contas[conta_informada]["cpf"]
+        print(f"\nO saldo da conta {conta_informada} é R$ {self.contas[conta_informada]['saldo']:.2f}")
 
     def salvar_atualizacoes(self):
         try:
             with open (ROOT_PATH / "clientes.json", "w", encoding="utf-8") as arquivo_clientes:
                 json.dump(self.clientes, arquivo_clientes, indent=2)
         except IOError as exc:
-            print(f"Erro ao tentar salvar as atualizações no arquivo de cliente: {exc}")
+            print(f"\nErro ao tentar salvar as atualizações no arquivo de cliente: {exc}")
 
         try:
             with open (ROOT_PATH / "contas.json", "w", encoding="utf-8") as arquivo_contas:
                 json.dump(self.contas, arquivo_contas, indent=2)
         except IOError as exc:
-            print(f"Erro ao tentar salvar as atualizações no arquivo de contas: {exc}")
+            print(f"\nErro ao tentar salvar as atualizações no arquivo de contas: {exc}")
             
 
 
@@ -405,49 +439,47 @@ def listar_usuarios():
 
 def main():
     meu_banco = Banco(ref_clientes, ref_contas)
+    fazer_transacao = Transacoes(ref_contas)
 
 
     while True:
         opcao = menu().lower()
         if opcao == "d":
-            conta_informada = int(input("Informe o número da conta para depósito: "))
-            conta_encontrada = False
-            arquivo_contas = open(ROOT_PATH / "contas.jsonl", "r", encoding="utf-8")
-            for linha in arquivo_contas:
-                conta = json.loads(linha)
-                if conta_informada == conta.get("numero_conta"):
-                    valor_str = input("Informe o valor do depósito ou digite x para voltar: ")
-                    conta_encontrada = True
-                    if valor_str.lower() == "x":
-                        break
-                    cpf = conta["cpf"]
-                    arquivo_contas.close()
-                    sacar_ou_depositar(
-                        conta_informada, valor = float(valor_str), metodo="deposito", cpf = cpf
-                        )
-                    break
-            if not conta_encontrada:
+            conta_informada = input("Informe o número da conta para depósito: ")
+            if conta_informada not in ref_contas:
                 print("\nConta não encontrada")
+                continue
+            valor = input("Informe o valor do depósito ou digite x para voltar: ")
+            if valor.lower() == "x":
+                continue
+            fazer_transacao.depositar(conta=conta_informada, valor=float(valor))
 
         elif opcao == "s":
-            conta_informada = int(input("Informe o número da conta para saque: "))
-            conta_encontrada = False
-            arquivo_contas = open(ROOT_PATH / "contas.jsonl", "r", encoding="utf-8")
-            for linha in arquivo_contas:
-                conta = json.loads(linha)
-                if conta_informada == conta.get("numero_conta"):
-                    valor_str = input("Informe o valor para sacar ou digite x para voltar: ")
-                    if valor_str.lower() == "x":
-                        continue
-                    conta_encontrada = True
-                    cpf = conta["cpf"]
-                    arquivo_contas.close()
-                    sacar_ou_depositar(
-                        conta_informada, valor = float(valor_str), metodo="saque", cpf = cpf
-                        )
-                    break
-            if not conta_encontrada:
-                print("\nConta não encontrada")
+            conta_informada = input("Informe o número da conta para saque: ")
+            if conta_informada not in ref_contas:
+                print("Conta não encontrada")
+                continue
+            valor = input("Informe o valor do saque ou digite x para voltar: ")
+            if valor.lower() == "x":
+                continue
+            fazer_transacao.sacar(conta=conta_informada, valor=float(valor))
+            # conta_encontrada = False
+            # arquivo_contas = open(ROOT_PATH / "contas.jsonl", "r", encoding="utf-8")
+            # for linha in arquivo_contas:
+            #     conta = json.loads(linha)
+            #     if conta_informada == conta.get("numero_conta"):
+            #         valor_str = input("Informe o valor para sacar ou digite x para voltar: ")
+            #         if valor_str.lower() == "x":
+            #             continue
+            #         conta_encontrada = True
+            #         cpf = conta["cpf"]
+            #         arquivo_contas.close()
+            #         sacar_ou_depositar(
+            #             conta_informada, valor = float(valor_str), metodo="saque", cpf = cpf
+            #             )
+            #         break
+            # if not conta_encontrada:
+            #     print("\nConta não encontrada")
 
         elif opcao == "e":
             conta = int(input("Informe o número da conta para exibir o extrato: "))
