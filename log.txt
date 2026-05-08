@@ -9,3 +9,4 @@
 02/05/2026 05:53:40, Foi executada a ação de listar_contas
 02/05/2026 05:53:45, Foi executada a ação de listar_usuarios
 02/05/2026 05:56:36, cliente de cpf 987, fez a ação de sacar_ou_depositar com os argumentos: [(4,), {'valor': 200.0, 'metodo': 'deposito'}], e retornou None 
+08/05/2026 02:27:09, Foi executada a ação de listar_usuarios

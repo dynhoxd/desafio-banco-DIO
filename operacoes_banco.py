@@ -66,10 +66,114 @@ def menu():
         [rc] Registrar Conta
         [lu] Listar Usuários
         [lc] Listar Contas
+        [es] Exibir Saldo
         [x] Sair
               \n========================================\n
     => """
     )
+
+try:
+    with open (ROOT_PATH / "clientes.json", "r", encoding="utf-8") as arquivo_clientes:
+        ref_clientes = json.load(arquivo_clientes)
+except:
+    ref_clientes = {}
+
+try:
+    with open (ROOT_PATH / "contas.json", "r", encoding="utf-8") as arquivo_contas:
+        ref_contas = json.load(arquivo_contas)
+except:
+    ref_contas = {"0":{"numero_total_contas": "0"}}
+
+
+class Transacoes:
+    def __init__(self, contas):
+        self.contas = contas
+    def depositar(self):
+        pass
+    def sacar(self):
+        pass
+
+class Banco:
+    def __init__(self, clientes, contas):
+        self.clientes = clientes
+        self.contas = contas
+        self.agencia = "0001"
+
+    def registrar_usuario(self, novo_cliente):
+        self.clientes[novo_cliente["cpf"]] = {
+            "nome":novo_cliente["nome"],
+            "data_nascimento":novo_cliente["data_nascimento"],
+            "endereco":novo_cliente["endereco"],
+            "contas": []
+        }
+        self.salvar_atualizacoes()
+        print("\nUsuário registrado com sucesso")
+
+    def registrar_conta(self, nova_conta):
+        self.contas[nova_conta["numero_conta"]] = {
+            "agencia": self.agencia,
+            "saldo": 0,
+            "limite_valor_saque_dia": 500,
+            "saques_efetuados_hoje": 0,
+            "titular": nova_conta["titular"],
+            "cpf": nova_conta["cpf"],
+            }
+        numero_total_contas = nova_conta["numero_conta"]
+        self.contas["0"]["numero_total_contas"] = str(numero_total_contas)
+        self.clientes[nova_conta["cpf"]]["contas"].append({
+            "agencia": self.agencia,
+            "numero_conta": nova_conta["numero_conta"]
+        })
+        self.salvar_atualizacoes()
+        print("\nConta registrada com sucesso")
+        
+    def listar_contas(self):
+        for numero_conta, conta in self.contas.items():
+            if numero_conta != "0":
+                print(
+                    textwrap.dedent(
+                        f"""\n
+                    Conta: {numero_conta}\n
+                    Agência: {conta["agencia"]}\n
+                    Saldo: R$ {conta["saldo"]:.2f}\n
+                    Limite disponível para saque hoje: R$ {conta["limite_valor_saque_dia"]:.2f}\n
+                """)
+        )
+
+    def listar_usuarios(self):
+        for cpf, usuario in self.clientes.items():
+            print(textwrap.dedent(f"""
+                nome: {usuario['nome']}
+                cpf: {cpf}
+                data de nascimento: {usuario['data_nascimento']}
+                endereço: {usuario['endereco']}
+                contas: 
+            """))
+            for conta in usuario['contas']:
+                print(f"""
+                agência: {conta['agencia']}
+                numero da conta: {conta['numero_conta']}
+                """)
+            print("\n----------------------------------------\n")
+
+    def exibir_saldo(self, conta_informada):
+        print(f"O saldo da conta {conta_informada} é R$ {self.contas[conta_informada]['saldo']:.2f}")
+
+    def salvar_atualizacoes(self):
+        try:
+            with open (ROOT_PATH / "clientes.json", "w", encoding="utf-8") as arquivo_clientes:
+                json.dump(self.clientes, arquivo_clientes, indent=2)
+        except IOError as exc:
+            print(f"Erro ao tentar salvar as atualizações no arquivo de cliente: {exc}")
+
+        try:
+            with open (ROOT_PATH / "contas.json", "w", encoding="utf-8") as arquivo_contas:
+                json.dump(self.contas, arquivo_contas, indent=2)
+        except IOError as exc:
+            print(f"Erro ao tentar salvar as atualizações no arquivo de contas: {exc}")
+            
+
+
 
 
 @decorador_log
@@ -108,7 +212,8 @@ def sacar_ou_depositar(conta_informada, valor, *, metodo, cpf):
     except Exception as exc:
         print(f"Erro ao realizar a operação. {exc}")
     finally:
-        if arquivo_temp := os.path.exists(ROOT_PATH / "contas_temp.jsonl"):
+        if os.path.exists(ROOT_PATH / "contas_temp.jsonl"):
+            arquivo_temp = ROOT_PATH / "contas_temp.jsonl"
             os.remove(arquivo_temp)
     if metodo == "sacar":
         return "Saque", valor
@@ -299,8 +404,8 @@ def listar_usuarios():
 
 
 def main():
-    contagem_contas = 2
-    NUMERO_AGENCIA = "0001"
+    meu_banco = Banco(ref_clientes, ref_contas)
+
 
     while True:
         opcao = menu().lower()
@@ -324,8 +429,6 @@ def main():
             if not conta_encontrada:
                 print("\nConta não encontrada")
 
-
-
         elif opcao == "s":
             conta_informada = int(input("Informe o número da conta para saque: "))
             conta_encontrada = False
@@ -345,7 +448,6 @@ def main():
                     break
             if not conta_encontrada:
                 print("\nConta não encontrada")
-
 
         elif opcao == "e":
             conta = int(input("Informe o número da conta para exibir o extrato: "))
@@ -367,17 +469,15 @@ def main():
                 exibir_extrato(
                     saldo, extrato=extrato, conta=conta, tipo_operacao=tipo_operacao
                 )
+
         elif opcao == "ru":
-            try:
-                cpf = input("Informe o CPF do novo cliente (somente números): ")
-                with open(
-                    ROOT_PATH / "clientes.jsonl", "r", encoding="utf-8"
-                ) as arquivo_usuarios:
-                    for linha in arquivo_usuarios:
-                        usuario = json.loads(linha)
-                        if usuario.get("cpf") == cpf:
-                            print("Usuário já cadastrado com esse CPF.")
-                            break
+            cpf = input("Informe o número do cpf ou x para voltar: ")
+            if cpf.lower() == "x":
+                continue
+            if cpf in ref_clientes:
+                print("Este CPF já está associado a um usuário")
+                continue
+            else:
                 nome = input("Informe o nome do novo cliente: ")
                 data_nascimento = input(
                     "Informe a data de nascimento do novo cliente (DD-MM-AAAA): "
@@ -385,60 +485,35 @@ def main():
                 endereco = input(
                     "Informe o endereço do novo cliente (logradouro, número - bairro - cidade/sigla estado): "
                 )
-                registrar_usuario(nome, data_nascimento, cpf = cpf, endereco = endereco)
-            except IOError as exc:
-                print(f"Erro ao realizar a operação. {exc}")
-            except IsADirectoryError as exc:
-                print(f"Erro ao tentar abrir o arquivo. {exc}")
-            except FileNotFoundError as exc:
-                print(f"Arquivo não encontrado. {exc}")
-            except Exception as exc:
-                print(f"Erro ao realizar a operação. {exc}")
-        elif opcao == "rc":
-            try:
-                cpf = input("Informe o CPF do cliente: ")
-                arquivo_usuarios = open(ROOT_PATH / "clientes.jsonl", "r", encoding="utf-8")
-                encontrado = False
-                for linha in arquivo_usuarios:
-                    usuario = json.loads(linha)
-                    if usuario.get("cpf") == cpf:
-                        nome = usuario["nome"]
-                        arquivo_usuarios.close()
-                        registrar_conta(nome, cpf = cpf)
-                        encontrado = True
-                        break
-                if not encontrado:
-                    print(
-                        """Usuário não encontrado.
-                        Por favor, registre o usuário antes de criar uma conta!"""
-                    )
-            except IOError as exc:
-                print(f"Erro ao realizar a operação. {exc}")
-            except IsADirectoryError as exc:
-                print(f"Erro ao tentar abrir o arquivo. {exc}")
-            except FileNotFoundError as exc:
-                print(f"Arquivo não encontrado. {exc}")
-            except Exception as exc:
-                print(f"Erro ao realizar a operação. {exc}")
+                novo_cliente = {"cpf":cpf, "nome":nome, "data_nascimento": data_nascimento, "endereco": endereco}
+                meu_banco.registrar_usuario(novo_cliente)
 
-            # cpf = input("Informe o cpf do usuário titular da nova conta: ")
-            # rc_user_iterator = iter(usuarios)
-            # for usuario in rc_user_iterator:
-            #     if usuario.get("cpf") == cpf:
-            #         contagem_contas += 1
-            #         numero_conta = contagem_contas
-            #         registrar_conta(
-            #             NUMERO_AGENCIA, numero_conta, usuario, contas, cpf
-            #         )
-            #         break
-            # else:
-            #     print(
-            #         "Usuário não encontrado. Por favor, registre o usuário antes de criar uma conta!"
-            #     )
+        elif opcao == "rc":
+            cpf = input("\nInforme o cpf do usuário titular da nova conta ou x para voltar: ")
+            if cpf.lower() == "x":
+                continue
+            if cpf not in ref_clientes:
+                print("\nÉ necessário cadastrar o cliente antes de criar uma conta")
+                continue
+            else:
+                numero_conta = int(ref_contas["0"]["numero_total_contas"]) + 1
+                titular = ref_clientes[cpf]["nome"]
+                nova_conta = {"cpf":cpf, "numero_conta": numero_conta, "titular": titular}
+                meu_banco.registrar_conta(nova_conta)
+                
         elif opcao == "lu":
-            listar_usuarios()
+            meu_banco.listar_usuarios()
+
         elif opcao == "lc":
-            listar_contas()
+            meu_banco.listar_contas()
+
+        elif opcao == "es":
+            conta_informada = input("Informe o número da conta para exibir o saldo: ")
+            if conta_informada not in ref_contas:
+                print("\nConta não encontrada")
+                continue
+            meu_banco.exibir_saldo(conta_informada)
+            
         elif opcao == "x":
             print("Obrigado por utilizar nossos serviços.")
             break

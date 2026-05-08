@@ -1,0 +1,43 @@
+{
+  "123": {
+    "nome": "ana",
+    "data_nascimento": "123123",
+    "endereco": "rua tal",
+    "contas": [
+      {
+        "agencia": "0001",
+        "numero_conta": 1
+      },
+      {
+        "agencia": "0001",
+        "numero_conta": 2
+      }
+    ]
+  },
+  "321": {
+    "nome": "raul",
+    "data_nascimento": "342423",
+    "endereco": "rua f",
+    "contas": [
+      {
+        "agencia": "0001",
+        "numero_conta": 3
+      },
+      {
+        "agencia": "0001",
+        "numero_conta": 4
+      }
+    ]
+  },
+  "987": {
+    "nome": "Iza",
+    "data_nascimento": "13123",
+    "endereco": "av h",
+    "contas": [
+      {
+        "agencia": "0001",
+        "numero_conta": 5
+      }
+    ]
+  }
+}
