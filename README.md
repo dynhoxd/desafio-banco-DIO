@@ -11,6 +11,8 @@ Usei tudo o que aprendi até o momento e fiz consultas com IA e na internet para
 
 ## Atualizações
 
+19/06/2026 - estruturei meu código para estar conforme POO, segundo a noção que tenho sobre essa estruturação.
+
 01/05/2026 - atualizada a função de registrar conta, mas não consigo fazê-la funcionar corretamente, pois tenho um constante erro WinError 5 que não consigo solucionar neste commit.
 
 29/04/2026 - criei os arquivos clientes e contas.jsonl para tornar o programa persistente. Implementei o uso do pacote json para converter as informações. Usei a tática de criar um arquivo temporário para escrita dos dados,
