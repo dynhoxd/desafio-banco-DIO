@@ -65,15 +65,13 @@ def menu():
         "rc": "Registrar Conta",
         "lu": "Listar Usuários",
         "lc": "Listar Contas",
-        "x": "Sair"
+        "x": "Sair",
     }
-    # print(f"{'MENU DE OPERAÇÕES':^=40}")
-    print("MENU DE OPERAÇÕES".center(40, "="))
+    print("\nMENU DE OPERAÇÕES".center(40, "="))
     for chave, descricao in opcoes.items():
-        print(f"[{chave:^2}] - {descricao}" )
+        print(f"[{chave:2}] - {descricao}")
     print("=" * 40)
     return input("Escolha uma opção: ")
-
 
 
 try:
@@ -86,41 +84,34 @@ try:
     with open(ROOT_PATH / "contas.json", "r", encoding="utf-8") as arquivo_contas:
         ref_contas = json.load(arquivo_contas)
 except:
-    ref_contas = {"0": {"numero_total_contas": "0"}}
+    ref_contas = {"0": {"numero_contas_cadastradas": "0"}}
 
-class SaqueIvalidoError(Exception):
-    pass
 
 class Transacoes:
     def __init__(self, contas):
         self.contas = contas
-
-
-    def verificar_conta(self, conta):
-        return conta in self.contas
 
     @decorador_log
     def depositar(self, conta, valor):
         self.cpf = self.contas[conta]["cpf"]
         self.contas[conta]["saldo"] += valor
         self.salvar_atualizacoes()
-        print(f"\nO depósito de €{valor} na conta {conta} foi feito com sucesso")
 
     @decorador_log
     def sacar(self, conta, valor):
-        self.cpf = self.contas[conta]["cpf"]
-        if valor > self.contas[conta]["saldo"]:
+        # self.cpf = self.contas[conta]["cpf"]
+        dados = self.contas.get(conta)
+        if valor > dados.get("saldo"):
             raise ValueError("\nSaldo insuficiente")
-        elif valor > self.contas[conta]["limite_valor_saque_dia"]:
+        elif valor > dados.get("limite_valor_saque_dia"):
             raise ValueError("\nLimite de valor diário excedido")
-        elif self.contas[conta]["saques_efetuados_hoje"] == 10:
+        elif dados.get("saques_efetuados_hoje") == 10:
             raise ValueError("\nLimite de saques diários excedido")
         else:
-            self.contas[conta]["saldo"] -= valor
-            self.contas[conta]["saques_efetuados_hoje"] += 1
-            self.contas[conta]["limite_valor_saque_dia"] -= valor
+            dados["saldo"] -= valor
+            dados["saques_efetuados_hoje"] += 1
+            dados["limite_valor_saque_dia"] -= valor
             self.salvar_atualizacoes()
-        # print(self)
 
     def salvar_atualizacoes(self):
         try:
@@ -135,10 +126,17 @@ class Transacoes:
 
 
 class Banco:
+    agencia = "0001"
+
     def __init__(self, clientes, contas):
         self.clientes = clientes
         self.contas = contas
-        self.agencia = "0001"
+
+    def verificar_conta(self, conta):
+        return conta in self.contas
+
+    def verificar_cpf(self, cpf):
+        return cpf in self.clientes
 
     @decorador_log
     def registrar_usuario(self, novo_cliente):
@@ -150,26 +148,24 @@ class Banco:
             "contas": [],
         }
         self.salvar_atualizacoes()
-        print("\nUsuário registrado com sucesso")
 
     @decorador_log
-    def registrar_conta(self, nova_conta):
-        self.cpf = self.contas[nova_conta["cpf"]]
-        self.contas[nova_conta["numero_conta"]] = {
-            "agencia": self.agencia,
+    def registrar_conta(self, cpf):
+        numero_conta = int(self.contas["0"]["numero_contas_cadastradas"]) + 1
+        titular = self.clientes.get(cpf).get("nome")
+        self.contas[numero_conta] = {
+            "agencia": Banco.agencia,
             "saldo": 0,
             "limite_valor_saque_dia": 500,
             "saques_efetuados_hoje": 0,
-            "titular": nova_conta["titular"],
-            "cpf": self.cpf,
+            "titular": titular,
+            "cpf": cpf,
         }
-        numero_total_contas = nova_conta["numero_conta"]
-        self.contas["0"]["numero_total_contas"] = str(numero_total_contas)
-        self.clientes[self.cpf]["contas"].append(
-            {"agencia": self.agencia, "numero_conta": nova_conta["numero_conta"]}
+        self.contas["0"]["numero_contas_cadastradas"] = str(numero_conta)
+        self.clientes.get(cpf).get("contas").append(
+            {"agencia": Banco.agencia, "numero_conta": numero_conta}
         )
         self.salvar_atualizacoes()
-        print("\nConta registrada com sucesso")
 
     @decorador_log
     def listar_contas(self):
@@ -233,7 +229,6 @@ class Banco:
             )
 
 
-
 def main():
     meu_banco = Banco(ref_clientes, ref_contas)
     fazer_transacao = Transacoes(ref_contas)
@@ -242,17 +237,28 @@ def main():
         opcao = menu().lower()
         if opcao == "d":
             conta_informada = input("Informe o número da conta para depósito: ")
-            if conta_informada not in ref_contas:
-                print("\nConta não encontrada")
+            if not meu_banco.verificar_conta(conta_informada):
+                print("Conta não encontrada")
                 continue
             valor_str = input("Informe o valor do depósito ou digite x para voltar: ")
             if valor_str.lower() == "x":
                 continue
+            try:
+                valor = int(valor_str)
+                if valor < 0:
+                    print("Valores negativos não são permitidos")
+                    continue
+            except:
+                print("Valor inválido. \nDigite um número!")
+                continue
             fazer_transacao.depositar(conta=conta_informada, valor=float(valor_str))
+            print(
+                f"\nO depósito de €{valor} na conta {conta_informada} foi realizado com sucesso"
+            )
 
         elif opcao == "s":
             conta_informada = input("Informe o número da conta para saque: ")
-            if not fazer_transacao.verificar_conta(conta_informada):
+            if not meu_banco.verificar_conta(conta_informada):
                 print("Conta não encontrada")
                 continue
             valor_str = input("Informe o valor do saque ou digite x para voltar: ")
@@ -263,18 +269,18 @@ def main():
                 if valor < 0:
                     print("Valores negativos não são permitidos")
                     continue
-                try:
-                    fazer_transacao.sacar(conta=conta_informada, valor=float(valor_str))
-                    print(f"\nO saque de €{valor_str} da conta {conta_informada} foi feito com sucesso")
-                except ValueError as e:
-                    print(e)
-                except Exception as e:
-                    print("Aconteu o seguinte erro ao tentar fazer o saque: " + e)
             except:
-                print("Valor inválido. \nDigite um número")
-            
-
-
+                print("Valor inválido. \nDigite um número!")
+                continue
+            try:
+                fazer_transacao.sacar(conta=conta_informada, valor=valor)
+                print(
+                    f"\nO saque de €{valor_str} da conta {conta_informada} foi realizado com sucesso"
+                )
+            except ValueError as e:
+                print(e)
+            except Exception as e:
+                print(f"Aconteceu o seguinte erro ao tentar fazer o saque: {e}")
 
         elif opcao == "e":
             pass
@@ -296,17 +302,17 @@ def main():
             #     ).lower()
             #     exibir_extrato(
             #         saldo, extrato=extrato, conta=conta, tipo_operacao=tipo_operacao
-                # )
+            # )
 
         elif opcao == "ru":
             cpf = input("Informe o número do cpf ou x para voltar: ")
             if cpf.lower() == "x":
                 continue
             elif not cpf.isdigit():
-                print("Apenas números são aceites")
+                print("\nApenas números são aceites")
                 continue
-            elif cpf in ref_clientes:
-                print("Este CPF já está associado a um usuário")
+            elif meu_banco.verificar_cpf(cpf):
+                print("\nEste CPF já está associado a um usuário")
                 continue
             else:
                 nome = input("Informe o nome do novo cliente: ")
@@ -323,6 +329,7 @@ def main():
                     "endereco": endereco,
                 }
                 meu_banco.registrar_usuario(novo_cliente)
+                print("\nUsuário registrado com sucesso")
 
         elif opcao == "rc":
             cpf = input(
@@ -330,18 +337,22 @@ def main():
             )
             if cpf.lower() == "x":
                 continue
-            if cpf not in ref_clientes:
+            elif not cpf.isdigit():
+                print("\nDigite apenas números")
+                continue
+            elif not meu_banco.verificar_cpf(cpf):
                 print("\nÉ necessário cadastrar o cliente antes de criar uma conta")
                 continue
             else:
-                numero_conta = int(ref_contas["0"]["numero_total_contas"]) + 1
-                titular = ref_clientes[cpf]["nome"]
-                nova_conta = {
-                    "cpf": cpf,
-                    "numero_conta": numero_conta,
-                    "titular": titular,
-                }
-                meu_banco.registrar_conta(nova_conta)
+                # numero_conta = int(ref_contas["0"]["numero_total_contas"]) + 1
+                # titular = ref_clientes[cpf]["nome"]
+                # nova_conta = {
+                #     "cpf": cpf,
+                #     "numero_conta": numero_conta,
+                #     "titular": titular,
+                # }
+                meu_banco.registrar_conta(cpf)
+                print("\nConta registrada com sucesso")
 
         elif opcao == "lu":
             meu_banco.listar_usuarios()
@@ -351,7 +362,7 @@ def main():
 
         elif opcao == "es":
             conta_informada = input("Informe o número da conta para exibir o saldo: ")
-            if conta_informada not in ref_contas:
+            if not meu_banco.verificar_conta(conta_informada):
                 print("\nConta não encontrada")
                 continue
             meu_banco.exibir_saldo(conta_informada)

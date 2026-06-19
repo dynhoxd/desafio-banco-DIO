@@ -4,5 +4,20 @@
     "data_nascimento": "21352",
     "endereco": "rua a",
     "contas": []
+  },
+  "321": {
+    "nome": "Pedro",
+    "data_nascimento": "01012000",
+    "endereco": "Rua b",
+    "contas": [
+      {
+        "agencia": "0001",
+        "numero_conta": 1
+      },
+      {
+        "agencia": "0001",
+        "numero_conta": 2
+      }
+    ]
   }
 }

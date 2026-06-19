@@ -20,3 +20,10 @@
 11/05/2026 19:12:54, cliente de cpf 321, fez a ação de sacar com os argumentos: [{'conta': '4', 'valor': 1000.0}]
 10/06/2026 15:06:18, Foi executada a ação de registrar_usuario
 10/06/2026 15:14:00, Foi executada a ação de registrar_usuario
+19/06/2026 01:18:28, Foi executada a ação de registrar_usuario
+19/06/2026 02:04:03, Foi executada a ação de registrar_conta
+19/06/2026 02:06:10, Foi executada a ação de registrar_conta
+19/06/2026 02:12:54, Foi executada a ação de listar_contas
+19/06/2026 02:13:08, Foi executada a ação de listar_usuarios
+19/06/2026 02:13:40, cliente de cpf 321, fez a ação de depositar com os argumentos: [{'conta': '1', 'valor': 1000.0}]
+19/06/2026 02:16:47, cliente de cpf 321, fez a ação de exibir_saldo com os argumentos: [{}]
