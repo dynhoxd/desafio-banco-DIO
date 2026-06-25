@@ -1,7 +1,4 @@
 {
-  "0": {
-    "numero_contas_cadastradas": "2"
-  },
   "1": {
     "agencia": "0001",
     "saldo": 1000.0,
@@ -17,5 +14,21 @@
     "saques_efetuados_hoje": 0,
     "titular": "Pedro",
     "cpf": "321"
+  },
+  "4": {
+    "agencia": "0001",
+    "saldo": 0,
+    "limite_valor_saque_dia": 500,
+    "saques_efetuados_hoje": 0,
+    "titular": "OA",
+    "cpf": "8"
+  },
+  "5": {
+    "agencia": "0001",
+    "saldo": 0,
+    "limite_valor_saque_dia": 500,
+    "saques_efetuados_hoje": 0,
+    "titular": "OA",
+    "cpf": "8"
   }
 }

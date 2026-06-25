@@ -1,5 +1,0 @@
-{"numero_total_contas": 4}
-{"agencia": "0001", "numero_conta": 1, "saldo": 1050.0, "limite_valor_saque_dia": 450.0, "saques_efetuados_hoje": 2, "titular": "Ana Pereira", "cpf": "123"}
-{"agencia": "0001", "numero_conta": 2, "saldo": 900.0, "limite_valor_saque_dia": 500, "saques_efetuados_hoje": 0, "titular": "Bruno Cardoso", "cpf": "234"}
-{"agencia": "0001", "numero_conta": 3, "saldo": 750.0, "limite_valor_saque_dia": 500, "saques_efetuados_hoje": 0, "titular": "Iza Munique", "cpf": "987"}
-{"agencia": "0001", "numero_conta": 4, "saldo": 200.0, "limite_valor_saque_dia": 500, "saques_efetuados_hoje": 0, "titular": "Iza Munique", "cpf": "987"}

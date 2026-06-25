@@ -1,6 +1,5 @@
 import datetime
 import json
-import os
 import textwrap
 from functools import wraps
 from pathlib import Path
@@ -29,8 +28,7 @@ def decorador_log(func):
     def faz_log(*args, **kwargs):
         now = datetime.datetime.now()
         f = func(*args, **kwargs)
-        cpf = getattr(args[0], "cpf", None) if args else None
-        # cpf = kwargs.get("cpf")
+        cpf = getattr(args[0], "cpf", None) #if args else None
         args_nomeados = kwargs.copy()
         if "cpf" in args_nomeados:
             del args_nomeados["cpf"]
@@ -65,9 +63,11 @@ def menu():
         "rc": "Registrar Conta",
         "lu": "Listar Usuários",
         "lc": "Listar Contas",
+        "du": "Deletar Usuário",
+        "dc": "Deletar Conta",
         "x": "Sair",
     }
-    print("\nMENU DE OPERAÇÕES".center(40, "="))
+    print("MENU DE OPERAÇÕES".center(40, "="))
     for chave, descricao in opcoes.items():
         print(f"[{chave:2}] - {descricao}")
     print("=" * 40)
@@ -84,7 +84,7 @@ try:
     with open(ROOT_PATH / "contas.json", "r", encoding="utf-8") as arquivo_contas:
         ref_contas = json.load(arquivo_contas)
 except:
-    ref_contas = {"0": {"numero_contas_cadastradas": "0"}}
+    ref_contas = {}
 
 
 class Transacoes:
@@ -151,7 +151,9 @@ class Banco:
 
     @decorador_log
     def registrar_conta(self, cpf):
-        numero_conta = int(self.contas["0"]["numero_contas_cadastradas"]) + 1
+        numeros_contas = [int(n) for n in self.contas.keys() if str(n).isdigit()]
+        maior_conta = max(numeros_contas) if numeros_contas else 0
+        numero_conta = maior_conta + 1
         titular = self.clientes.get(cpf).get("nome")
         self.contas[numero_conta] = {
             "agencia": Banco.agencia,
@@ -161,7 +163,6 @@ class Banco:
             "titular": titular,
             "cpf": cpf,
         }
-        self.contas["0"]["numero_contas_cadastradas"] = str(numero_conta)
         self.clientes.get(cpf).get("contas").append(
             {"agencia": Banco.agencia, "numero_conta": numero_conta}
         )
@@ -206,6 +207,23 @@ class Banco:
         print(
             f"\nO saldo da conta {conta_informada} é R$ {self.contas[conta_informada]['saldo']:.2f}"
         )
+    
+    @decorador_log
+    def deletar_usuario(self, cpf):
+        self.clientes.pop(cpf, None)
+        self.salvar_atualizacoes()
+
+    @decorador_log
+    def deletar_conta(self, conta):
+        cpf = self.contas[conta]["cpf"]
+        self.contas.pop(conta, None)
+        lista_contas = self.clientes[cpf]["contas"]
+        for i, conta_cadastrada in enumerate(lista_contas):
+            if conta_cadastrada["numero_conta"] == int(conta):
+                lista_contas.pop(i)
+
+        self.salvar_atualizacoes()
+
 
     def salvar_atualizacoes(self):
         try:
@@ -366,6 +384,34 @@ def main():
                 print("\nConta não encontrada")
                 continue
             meu_banco.exibir_saldo(conta_informada)
+
+        elif opcao == "du":
+            cpf = input(
+                "\nInforme o cpf do usuário ou x para voltar: "
+            )
+            if cpf.lower() == "x":
+                continue
+            elif not cpf.isdigit():
+                print("\nDigite apenas números")
+                continue
+            elif not meu_banco.verificar_cpf(cpf):
+                print("\nNão existe um usuário com este CPF")
+                continue
+            meu_banco.deletar_usuario(cpf)
+            print("\nUsuário deletado com sucesso")
+
+        elif opcao == "dc":
+            conta_informada = input(
+                "\nInforme o número da conta a deletar ou x para voltar: "
+            )
+            if conta_informada.lower() == "x":
+                continue
+            if not meu_banco.verificar_conta(conta_informada):
+                print("Conta não encontrada")
+                continue
+            meu_banco.deletar_conta(conta_informada)
+            print("\nConta deletada com sucesso")
+
 
         elif opcao == "x":
             print("Obrigado por utilizar nossos serviços.")

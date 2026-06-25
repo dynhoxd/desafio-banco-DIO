@@ -27,3 +27,13 @@
 19/06/2026 02:13:08, Foi executada a ação de listar_usuarios
 19/06/2026 02:13:40, cliente de cpf 321, fez a ação de depositar com os argumentos: [{'conta': '1', 'valor': 1000.0}]
 19/06/2026 02:16:47, cliente de cpf 321, fez a ação de exibir_saldo com os argumentos: [{}]
+25/06/2026 14:25:01, Foi executada a ação de registrar_usuario
+25/06/2026 14:25:42, Foi executada a ação de deletar_usuario
+25/06/2026 14:43:18, Foi executada a ação de registrar_usuario
+25/06/2026 14:43:24, Foi executada a ação de registrar_conta
+25/06/2026 14:43:33, Foi executada a ação de registrar_conta
+25/06/2026 14:50:56, Foi executada a ação de deletar_conta
+25/06/2026 15:07:03, Foi executada a ação de registrar_conta
+25/06/2026 15:38:30, Foi executada a ação de deletar_conta
+25/06/2026 15:41:52, Foi executada a ação de deletar_conta
+25/06/2026 15:42:18, Foi executada a ação de registrar_conta
